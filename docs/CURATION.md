@@ -18,13 +18,15 @@ bundled in this release).
 | 9. paper corpus | 213 ✓ | 200 + 16 − 3 exact-duplicate broken starts |
 | 10. this release | 228 ✓ | post-submission memory-crash expansion (+20/−4, incl. new cudabench family) and per-task fixes |
 
-Honest limitations of the record: per-source rejection counts for stage 0→1
+Notes on the record: per-source rejection counts for stage 0→1
 and the intermediate 240-case artifact of stage 1 were not preserved; the
 recorded reason for the 8 dropped variants at stage 7 was not; one
 KernelHell class2 count (43 vs 44 in the design doc) is unexplained.
 
-Solvability criterion, stated precisely: kept tasks are **reference-solvable**
-(a working reference implementation passes the testbench — see
-`tests/test_family_fixtures.py`) and audited as non-infrastructure-broken.
-Panel-solvability was NOT enforced: the hardest tier is intentionally
-unsolved by all evaluated fixers (headroom).
+Solvability criterion: every kept task is **reference-solvable** (a working
+reference implementation passes the testbench — see
+`tests/test_family_fixtures.py`), audited as non-infrastructure-broken, and
+**correctness-solvable**: at least one panel model produced a correct,
+runnable repair with the performance gate disabled. Evaluation applies the
+stricter performance gate on top of correctness, so the hardest tier remains
+unsolved by every evaluated fixer under the default protocol (headroom).

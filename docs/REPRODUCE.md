@@ -20,7 +20,7 @@ into the bundled CUTLASS / ThunderKittens headers). Idempotent; re-runnable.
 
 ## LLM endpoints — REQUIRED swap
 
-Each cfg's `api:` block has two fields a reviewer must point at their own
+Each cfg's `api:` block has two fields users must point at their own
 infrastructure before running the experiment:
 
 - `base_url` — an OpenAI-compatible HTTPS endpoint. The harness uses any

@@ -4,7 +4,7 @@
   "error_category": "perf_broken",
   "difficulty": "medium",
   "upstream_library": "NVIDIA cuFFT samples",
-  "broken_start_provenance": "LLM-generated, anonymous frontier model",
+  "broken_start_provenance": "LLM-generated, frontier model",
   "files": {
     "broken_start": "broken_start.cu",
     "reference": "reference.cu",

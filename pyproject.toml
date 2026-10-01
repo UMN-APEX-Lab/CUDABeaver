@@ -1,7 +1,12 @@
 [project]
 name = "cuda-debugger-bench-harness"
 version = "1.0.0"
-description = "Evaluation harness for CUDABeaver (NeurIPS 2026 anonymous submission)"
-authors = [{name = "Anonymous Authors", email = "anonymous@neurips2026.invalid"}]
+description = "Evaluation harness for CUDABeaver (NeurIPS 2026 Evaluations and Datasets Track)"
+authors = [
+  {name = "Shiyang Li", email = "li004074@umn.edu"},
+  {name = "Haoyang Chen", email = "chen9861@umn.edu"},
+  {name = "Mattia Fazzini", email = "mfazzini@umn.edu"},
+  {name = "Caiwen Ding", email = "dingc@umn.edu"},
+]
 license = {text = "CC BY 4.0"}
 requires-python = ">=3.10"

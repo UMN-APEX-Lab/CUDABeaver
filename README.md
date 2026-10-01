@@ -1,4 +1,4 @@
-# CUDABeaver
+# CUDABeaver (NeurIPS 2026)
 
 <p align="center">
   <img src="assets/repair.png" alt="CUDABeaver: LLM-driven CUDA kernel repair pipeline" width="100%">
@@ -13,7 +13,7 @@ This single repository ships **everything** end-to-end:
 - the evaluation harness (`harness/`) that drives the gen → build → test → score loop,
 - the analysis pipeline (`analysis/`) that produces every paper table,
 - 238 evaluation configs (`configs/`) covering 5 axes (iter / repeated / feedback / history / fewshot),
-- bundled CUTLASS + ThunderKittens headers (`data/_external/`) and a vendored copy of upstream KernelBench (`harness/_vendor/kernelbench/`) so reviewers don't need any external clones.
+- bundled CUTLASS + ThunderKittens headers (`data/_external/`) and a vendored copy of upstream KernelBench (`harness/_vendor/kernelbench/`) so no external clones are needed.
 
 ---
 
@@ -92,7 +92,7 @@ benchmark/                 canonical task list + timing baselines
   task_list.json             228 full-instance-id entries (used by --mode debug)
   references/                168 per-instance reference timing specs
   references_cache/          measured baselines: Blackwell sm_120 + H200 sm_90
-docs/                      PROTOCOL, PERF_PROTOCOL, REPRODUCE, ANONYMIZATION,
+docs/                      PROTOCOL, PERF_PROTOCOL, REPRODUCE,
                            DATA_SCHEMA (family semantics), CURATION (funnel)
 tests/                     smoke + per-family install fixtures (no LLM key)
 examples/                  pointers to reproduction walk-throughs (docs/REPRODUCE.md)
@@ -339,7 +339,7 @@ python -m analysis.pivot_tables  --in-dir analysis_out --out-dir analysis_out
 ### LLM endpoints — required swap
 
 Each cfg's `api:` block ships with placeholder `<CLOUD_API_BASE_URL>` +
-`CLOUD_API_KEY`. Reviewers must point these at their own infrastructure
+`CLOUD_API_KEY`. Users must point these at their own infrastructure
 (any OpenAI-compatible cloud API or a self-hosted vLLM server). See
 `docs/REPRODUCE.md § LLM endpoints` for details.
 
@@ -358,8 +358,9 @@ All required code/headers are bundled — most instances build with just
 | kernelbench                             | 84 | `harness/_vendor/kernelbench/` (registered via .pth)|
 | flashattention, layernorm, cufft_samples| 35 | `harness/applied_kernels_runner/` + reference_sources |
 
-**Total: 228 instances**, 100% buildable on CUDA 12 or 13 (see the
-build-audit table in `docs/REPRODUCE.md`).
+**Total: 228 instances**, buildable on CUDA 12.8+ or 13 (see the
+build-audit table in `docs/REPRODUCE.md`); the 4 ThunderKittens `sm_90a`
+kernels require a Hopper GPU and are skipped on other architectures.
 
 ---
 
@@ -376,3 +377,16 @@ Bundled third-party packages keep their own licenses:
   see `data/_external/cutlass/LICENSE.txt`
 - `data/_external/ThunderKittens/` — MIT License (HazyResearch), see
   `data/_external/ThunderKittens/LICENSE.txt`
+
+---
+
+## Citation
+
+```bibtex
+@inproceedings{li2026cudabeaver,
+  title     = {{CUDABeaver}: Benchmarking {LLM}-Based Automated {CUDA} Debugging},
+  author    = {Li, Shiyang and Chen, Haoyang and Fazzini, Mattia and Ding, Caiwen},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track},
+  year      = {2026}
+}
+```

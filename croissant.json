@@ -46,17 +46,31 @@
   },
   "@type": "sc:Dataset",
   "name": "CUDABeaver",
-  "description": "CUDABeaver is a benchmark of 228 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 12 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, ThunderKittens, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion to anonymous NeurIPS 2026 E&D Track submission.",
+  "description": "CUDABeaver is a benchmark of 228 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 12 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, ThunderKittens, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion dataset of the NeurIPS 2026 Evaluations and Datasets Track paper \"CUDABeaver: Benchmarking LLM-Based Automated CUDA Debugging\".",
   "license": "https://creativecommons.org/licenses/by/4.0/",
-  "url": "https://anonymous.4open.science/r/CUDADebugBench-F33E/",
+  "url": "https://github.com/UMN-APEX-Lab/CUDABeaver",
   "version": "1.0.0",
-  "creator": {
-    "@type": "Organization",
-    "name": "Anonymous Authors (NeurIPS 2026 submission)"
-  },
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "Shiyang Li"
+    },
+    {
+      "@type": "Person",
+      "name": "Haoyang Chen"
+    },
+    {
+      "@type": "Person",
+      "name": "Mattia Fazzini"
+    },
+    {
+      "@type": "Person",
+      "name": "Caiwen Ding"
+    }
+  ],
   "publisher": {
     "@type": "Organization",
-    "name": "Anonymous Authors"
+    "name": "University of Minnesota"
   },
   "datePublished": "2026-05-05",
   "distribution": [
@@ -65,8 +79,8 @@
       "@id": "manifest.json",
       "name": "manifest.json",
       "encodingFormat": "application/json",
-      "contentUrl": "https://anonymous.4open.science/api/repo/CUDADebugBench-F33E/file/manifest.json",
-      "sha256": "6c6cd4a9a1a1325d68553fa76f069a85059e65cb5bf1b082fcb26dbbba344486"
+      "contentUrl": "https://raw.githubusercontent.com/UMN-APEX-Lab/CUDABeaver/main/manifest.json",
+      "sha256": "a3694a088c27b1908348bfca56c8ef374cf3c4d4f97c16848bf3ffb7af4a9ecf"
     }
   ],
   "recordSet": [
@@ -125,7 +139,7 @@
           "@id": "instances/difficulty",
           "name": "difficulty",
           "dataType": "sc:Text",
-          "description": "Empirical difficulty tier L1-L5 derived from six-fixer solve-rate and mean-iteration count (paper App. D.4). L1: solved by all six members with mean iter <= 2; L2: same but mean iter > 2 (empirically empty); L3: solved by 3-5 of the six; L4: solved by 1-2; L5: not solved by any.",
+          "description": "Coarse difficulty label carried in the task metadata: one of easy, medium, hard. This is not the empirical L1-L5 tier used in the paper.",
           "source": {
             "fileObject": {
               "@id": "manifest.json"
@@ -186,25 +200,26 @@
     "http://mlcommons.org/croissant/1.0",
     "http://mlcommons.org/croissant/RAI/1.0"
   ],
-  "rai:dataCollection": "Broken CUDA kernels were collected by sampling iter-1 outputs from frontier LLMs (anonymous) on a held-out set of CUDA programming tasks; outputs that exhibited compile-error, logic-error, memory-crash, perf-broken, or timeout failures were curated as instances. References are author-written or sourced from CUTLASS / FlashAttention / cuFFT / KernelBench upstreams.",
+  "rai:dataCollection": "Broken CUDA kernels were collected by sampling iter-1 outputs from frontier LLMs on a held-out set of CUDA programming tasks; outputs that exhibited compile-error, logic-error, memory-crash, perf-broken, or timeout failures were curated as instances. References are author-written or sourced from CUTLASS / FlashAttention / cuFFT / KernelBench upstreams.",
   "rai:dataCollectionType": "Manual curation of LLM outputs + import from public open-source kernels",
   "rai:dataCollectionMissingData": "Tasks where no LLM-generated broken_start exhibited a target failure category were excluded. 8 reference-unstable kernels were trimmed during initial curation.",
   "rai:dataCollectionRawData": "Raw LLM completions are not redistributed (would re-identify the source frontier model). Only the curated broken_start code is included.",
-  "rai:dataCollectionTimeframe": "April 2026 - May 2026",
+  "rai:dataCollectionTimeframe": "April 2026 - July 2026",
   "rai:dataImputationProtocol": "Not applicable - no imputation. Missing testbench / reference for any task -> task excluded.",
   "rai:dataPreprocessingProtocol": "Source LLM outputs were only filtered for category match; no code rewriting beyond standardising file extensions and stripping comments that referenced the source LLM.",
   "rai:dataManipulationProtocol": "Each broken_start is the unmodified LLM iter-1 output. Reference implementations are unmodified upstream code (CUTLASS, FlashAttention, cuFFT samples, ThunderKittens, KernelBench) or author-written for the curated CUDA programming pool.",
-  "rai:dataAnnotationProtocol": "Each instance is annotated with: task_family, error_category (5 curation-time buckets, collapsed from an 8-category per-iteration classifier), and difficulty (L1-L5 tiers; see paper App. D.4). Annotation by deterministic classifier - no human labeling step.",
+  "rai:dataAnnotationProtocol": "Each instance is annotated with: task_family, error_category (5 curation-time buckets, collapsed from an 8-category per-iteration classifier), and difficulty (coarse easy / medium / hard label from the task metadata). Annotation by deterministic classifier - no human labeling step.",
   "rai:dataAnnotationPlatform": "Custom Python classifier (harness/classifier.py in companion code repo)",
   "rai:dataAnnotationAnalysis": "Inter-annotator agreement not applicable: the classifier is a deterministic rule-based system built on nvcc exit codes, error-pattern regex, and PyTorch reference comparison. Categorization is reproducible exactly given the harness output. Rules were developed iteratively against a 50-instance development set spanning all 5 error categories.",
   "rai:annotationsPerItem": "1 annotation per instance (deterministic)",
   "rai:annotatorDemographics": "N/A - automated annotation only",
   "rai:machineAnnotationTools": "Custom Python classifier; nvcc / KernelBench eval_kernel_against_ref for build+test-based category assignment",
-  "rai:dataBiases": "(a) Source LLM bias: broken_starts inherit failure-mode distributions of source models, biased toward common LLM mistakes. (b) Domain bias: 11 task families, weighted toward CUDA C++ + KernelBench Python; under-represents OpenCL, ROCm, Triton. (c) Difficulty skew: harder tiers (L4-L5) cluster in compile_error / memory_crash; easier tiers (L1) dominate logic_error.",
+  "rai:dataBiases": "(a) Source LLM bias: broken_starts inherit failure-mode distributions of source models, biased toward common LLM mistakes. (b) Domain bias: 12 task families, weighted toward CUDA C++ + KernelBench Python; under-represents OpenCL, ROCm, Triton. (c) Difficulty skew: harder tiers (L4-L5) cluster in compile_error / memory_crash; easier tiers (L1) dominate logic_error.",
   "rai:dataUseCases": "Evaluating LLM debugging capability on GPU kernels. Comparing test-time strategies. Studying feedback-richness, history-depth, few-shot exemplar effects.",
-  "rai:dataLimitations": "Single-iteration debugging only - does not measure long-horizon (>5 round) repair. Single-GPU evaluation (NVIDIA Blackwell). Not a measure of from-scratch kernel generation. Performance numbers are hardware-specific. License note: dataset curation is released under CC-BY 4.0; upstream-derived instances retain their original licenses (CUTLASS, FlashAttention v2: BSD-3-Clause; KernelBench, ThunderKittens: MIT). Per-instance license metadata is in instance.json.",
+  "rai:dataLimitations": "Single-iteration debugging only - does not measure long-horizon (>5 round) repair. Main evaluation on an NVIDIA RTX PRO 6000 Blackwell GPU, with a replication on an NVIDIA H200 (Hopper). Not a measure of from-scratch kernel generation. Performance numbers are hardware-specific. License note: dataset curation is released under CC-BY 4.0; upstream-derived instances retain their original licenses (CUTLASS, FlashAttention v2: BSD-3-Clause; KernelBench, ThunderKittens: MIT). Per-instance license metadata is in instance.json.",
   "rai:dataSocialImpact": "Low risk. Benchmark contains only public-domain CUDA programming patterns. No personal data. Dual-use: improved LLM debugging could accelerate GPU code generation.",
   "rai:personalSensitiveInformation": "None. Dataset contains only kernel source code with no PII, no user-identifying content, no copyrighted text outside CC-licensed upstreams.",
-  "rai:dataReleaseMaintenancePlan": "Versioned releases on the public dataset hosting platform. v1.0 = NeurIPS 2026 submission snapshot. Future major versions on bug fix or task-pool expansion. Maintained by the authors through paper publication; long-term mirror planned via Zenodo DOI after acceptance.",
-  "rai:hasSyntheticData": true
+  "rai:dataReleaseMaintenancePlan": "Versioned releases in the public GitHub repository https://github.com/UMN-APEX-Lab/CUDABeaver. Future versions on bug fixes or task-pool expansion. Maintained by the authors.",
+  "rai:hasSyntheticData": true,
+  "citeAs": "@inproceedings{li2026cudabeaver, title={{CUDABeaver}: Benchmarking {LLM}-Based Automated {CUDA} Debugging}, author={Li, Shiyang and Chen, Haoyang and Fazzini, Mattia and Ding, Caiwen}, booktitle={Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track}, year={2026}}"
 }

@@ -4,7 +4,7 @@
   "error_category": "compile_error",
   "difficulty": "easy",
   "upstream_library": "NVIDIA CUDA toolkit (cuBLAS)",
-  "broken_start_provenance": "LLM-generated, anonymous frontier model",
+  "broken_start_provenance": "LLM-generated, frontier model",
   "files": {
     "broken_start": "broken_start.cu",
     "reference": "reference.cu",

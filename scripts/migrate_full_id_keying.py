@@ -4,7 +4,7 @@
 The original layout keyed flat dirs, configs, and task_list.json by the BASE
 stem (`cuda_104`), but 18 stems have two instances in the 228-instance corpus:
 their flat symlinks silently overwrote each other, leaving 29 instances
-unreachable through the shipped task list (reviewer ar6W). Records and the
+unreachable through the shipped task list. Records and the
 reference-timing lookup keyed off input.json's embedded task_id (also the base
 stem), so the ambiguity propagated into results.
 

@@ -2,8 +2,7 @@
 representative task per family using the bundled reference solution as the
 candidate. No LLM API key required.
 
-This is the "does the eval pipeline actually work here" check reviewers asked
-for: it exercises the same compile_code/run_test path as a real run, so a
+This is the "does the eval pipeline actually work here" check: it exercises the same compile_code/run_test path as a real run, so a
 green suite means nvcc, torch+ninja JIT, the vendored kernelbench, and the
 applied-kernels make flow are all functional on this machine.
 

@@ -56,7 +56,6 @@ experiment:
   - "kernelbench_level2_12__memory_crash__486b14be"
   - "kernelbench_level2_3__compile_error__dd4f6cf7"
   - "kernelbench_level2_3__logic_error__dbf34be4"
-  - "kernelbench_level2_33__compile_error__d63b694a"
   few_shot_curated_file: evaluation/few_shot_curated.json
 build:
   workdir: /tmp/cuda_debugger_v3_gemma4_fewshot_curated_K1

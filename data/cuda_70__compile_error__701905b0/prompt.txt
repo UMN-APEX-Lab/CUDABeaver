@@ -1,3 +1,0 @@
-Write a function `void square_indices(thrust::device_vector<int> &vec);` that fills the input vector with the squares of the indices using one thrust algorithm.
-
-The function signature is provided in `include/square_indices.h`.

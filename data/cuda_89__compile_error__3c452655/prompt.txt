@@ -1,8 +1,0 @@
-Write a function with the signature defined in `include/mix_and_scramble.h`:
-
-```cpp
-void mix_and_scramble(thrust::device_vector<int> const& vec,
-                      thrust::device_vector<int>& res);
-```
-
-This function should take an input vector, reorder the elements in a random way, and store the result in the `res` vector using a single thrust algorithm.

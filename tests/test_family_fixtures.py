@@ -29,7 +29,7 @@ FAMILY_PREFIXES = [
     "cublas_",
     "cusolver_",
     "cusparse_",
-    "cufft_1",            # library cufft (cufft_samples_ is the applied family)
+    "cufft_6",            # library cufft (cufft_samples_ is the applied family)
     "kernelbench_",
     "cutlass_",
     "cufft_samples_",

@@ -47,7 +47,6 @@ experiment:
   - "kernelbench_level2_12__memory_crash__486b14be"
   - "kernelbench_level2_3__compile_error__dd4f6cf7"
   - "kernelbench_level2_3__logic_error__dbf34be4"
-  - "kernelbench_level2_33__compile_error__d63b694a"
 build:
   workdir: /tmp/cuda_debugger_v3_qwen36_27b_feedback_l1
   timeout: 300

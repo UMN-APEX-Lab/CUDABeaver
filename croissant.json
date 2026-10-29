@@ -46,7 +46,7 @@
   },
   "@type": "sc:Dataset",
   "name": "CUDABeaver",
-  "description": "CUDABeaver is a benchmark of 228 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 12 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, ThunderKittens, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion dataset of the NeurIPS 2026 Evaluations and Datasets Track paper \"CUDABeaver: Benchmarking LLM-Based Automated CUDA Debugging\".",
+  "description": "CUDABeaver is a benchmark of 203 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 12 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, ThunderKittens, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion dataset of the NeurIPS 2026 Evaluations and Datasets Track paper \"CUDABeaver: Benchmarking LLM-Based Automated CUDA Debugging\".",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "url": "https://github.com/UMN-APEX-Lab/CUDABeaver",
   "version": "1.0.0",
@@ -88,7 +88,7 @@
       "@type": "cr:RecordSet",
       "@id": "instances",
       "name": "instances",
-      "description": "228 broken-kernel instances.",
+      "description": "203 broken-kernel instances.",
       "field": [
         {
           "@type": "cr:Field",

@@ -1,7 +1,7 @@
 {
  "_doc": "Full-instance-id keyed task list: task_id = stem = data/ dir name. Base stems are ambiguous for 18 duplicated stems; do not key by them.",
  "schema_version": "task_list/2.0-fullid",
- "n_total": 228,
+ "n_total": 203,
  "entries": [
   {
    "task_id": "cublas_applications_154__compile_error__83af4bad",
@@ -23,28 +23,6 @@
     "code_path": "data/cublas_extensions_15__compile_error__8996b099/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "8996b0991275c900"
-   }
-  },
-  {
-   "task_id": "cublas_level1_10__compile_error__d6b7227b",
-   "stem": "cublas_level1_10__compile_error__d6b7227b",
-   "task_id_base": "cublas_level1_10",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cublas_level1_10__compile_error__d6b7227b/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "d6b7227b8d7efccc"
-   }
-  },
-  {
-   "task_id": "cuda_104__compile_error__f8160fc8",
-   "stem": "cuda_104__compile_error__f8160fc8",
-   "task_id_base": "cuda_104",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cuda_104__compile_error__f8160fc8/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "f8160fc8b8e813fd"
    }
   },
   {
@@ -155,17 +133,6 @@
     "code_path": "data/cuda_127__compile_error__a7b4a675/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "a7b4a675337c53dd"
-   }
-  },
-  {
-   "task_id": "cuda_137__compile_error__df17e5f1",
-   "stem": "cuda_137__compile_error__df17e5f1",
-   "task_id_base": "cuda_137",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cuda_137__compile_error__df17e5f1/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "df17e5f1b971138f"
    }
   },
   {
@@ -587,17 +554,6 @@
    }
   },
   {
-   "task_id": "cuda_22__compile_error__4d18e637",
-   "stem": "cuda_22__compile_error__4d18e637",
-   "task_id_base": "cuda_22",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cuda_22__compile_error__4d18e637/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "4d18e637392d52a8"
-   }
-  },
-  {
    "task_id": "cuda_230__logic_error__29f5516e",
    "stem": "cuda_230__logic_error__29f5516e",
    "task_id_base": "cuda_230",
@@ -653,17 +609,6 @@
    }
   },
   {
-   "task_id": "cuda_70__compile_error__701905b0",
-   "stem": "cuda_70__compile_error__701905b0",
-   "task_id_base": "cuda_70",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cuda_70__compile_error__701905b0/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "701905b0b31d8da8"
-   }
-  },
-  {
    "task_id": "cuda_87__compile_error__0e66ba5e",
    "stem": "cuda_87__compile_error__0e66ba5e",
    "task_id_base": "cuda_87",
@@ -672,17 +617,6 @@
     "code_path": "data/cuda_87__compile_error__0e66ba5e/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "c7a5b788e02b92df"
-   }
-  },
-  {
-   "task_id": "cuda_89__compile_error__3c452655",
-   "stem": "cuda_89__compile_error__3c452655",
-   "task_id_base": "cuda_89",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cuda_89__compile_error__3c452655/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "3c452655e5ddd78f"
    }
   },
   {
@@ -749,17 +683,6 @@
     "code_path": "data/cudabench_72__memory_crash__32cc9e41/broken_start.cu",
     "error_category": "memory_crash",
     "code_hash": "32cc9e410a2e73ca"
-   }
-  },
-  {
-   "task_id": "cufft_1__compile_error__611168ad",
-   "stem": "cufft_1__compile_error__611168ad",
-   "task_id_base": "cufft_1",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cufft_1__compile_error__611168ad/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "611168adc89103b8"
    }
   },
   {
@@ -906,17 +829,6 @@
    }
   },
   {
-   "task_id": "cusolver_19__compile_error__812bccf2",
-   "stem": "cusolver_19__compile_error__812bccf2",
-   "task_id_base": "cusolver_19",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cusolver_19__compile_error__812bccf2/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "812bccf29a2b2221"
-   }
-  },
-  {
    "task_id": "cusolver_22__compile_error__f16664b9",
    "stem": "cusolver_22__compile_error__f16664b9",
    "task_id_base": "cusolver_22",
@@ -936,17 +848,6 @@
     "code_path": "data/cusolver_23__compile_error__5d0216da/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "5d0216dab893756b"
-   }
-  },
-  {
-   "task_id": "cusolver_26__compile_error__134e9d37",
-   "stem": "cusolver_26__compile_error__134e9d37",
-   "task_id_base": "cusolver_26",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cusolver_26__compile_error__134e9d37/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "134e9d37b0e58018"
    }
   },
   {
@@ -972,17 +873,6 @@
    }
   },
   {
-   "task_id": "cusolver_6__compile_error__5e024f61",
-   "stem": "cusolver_6__compile_error__5e024f61",
-   "task_id_base": "cusolver_6",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cusolver_6__compile_error__5e024f61/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "5e024f61da5a7824"
-   }
-  },
-  {
    "task_id": "cusparse_26__compile_error__67ec6d6b",
    "stem": "cusparse_26__compile_error__67ec6d6b",
    "task_id_base": "cusparse_26",
@@ -1002,17 +892,6 @@
     "code_path": "data/cusparse_27__compile_error__2612d349/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "2612d349ccf22a62"
-   }
-  },
-  {
-   "task_id": "cusparse_2__compile_error__5aa181ca",
-   "stem": "cusparse_2__compile_error__5aa181ca",
-   "task_id_base": "cusparse_2",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/cusparse_2__compile_error__5aa181ca/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "5aa181ca9889fef6"
    }
   },
   {
@@ -1841,28 +1720,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level1_93__compile_error__9cc201b6",
-   "stem": "kernelbench_level1_93__compile_error__9cc201b6",
-   "task_id_base": "kernelbench_level1_93",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level1_93__compile_error__9cc201b6/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "9cc201b604c57062"
-   }
-  },
-  {
-   "task_id": "kernelbench_level1_94__compile_error__18d598a4",
-   "stem": "kernelbench_level1_94__compile_error__18d598a4",
-   "task_id_base": "kernelbench_level1_94",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level1_94__compile_error__18d598a4/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "18d598a41f829841"
-   }
-  },
-  {
    "task_id": "kernelbench_level1_97__timeout__f0036e46",
    "stem": "kernelbench_level1_97__timeout__f0036e46",
    "task_id_base": "kernelbench_level1_97",
@@ -1918,17 +1775,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level2_15__compile_error__16c7784d",
-   "stem": "kernelbench_level2_15__compile_error__16c7784d",
-   "task_id_base": "kernelbench_level2_15",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_15__compile_error__16c7784d/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "16c7784dd8ca28bc"
-   }
-  },
-  {
    "task_id": "kernelbench_level2_19__compile_error__9a45fbb0",
    "stem": "kernelbench_level2_19__compile_error__9a45fbb0",
    "task_id_base": "kernelbench_level2_19",
@@ -1948,39 +1794,6 @@
     "code_path": "data/kernelbench_level2_22__compile_error__31cb416e/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "31cb416e8cc6ffe2"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_23__compile_error__b2c65431",
-   "stem": "kernelbench_level2_23__compile_error__b2c65431",
-   "task_id_base": "kernelbench_level2_23",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_23__compile_error__b2c65431/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "b2c65431e7b71e6c"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_28__compile_error__3924bbe7",
-   "stem": "kernelbench_level2_28__compile_error__3924bbe7",
-   "task_id_base": "kernelbench_level2_28",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_28__compile_error__3924bbe7/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "3924bbe70b34eacd"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_29__compile_error__2ef81608",
-   "stem": "kernelbench_level2_29__compile_error__2ef81608",
-   "task_id_base": "kernelbench_level2_29",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_29__compile_error__2ef81608/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "2ef81608dda9823f"
    }
   },
   {
@@ -2006,17 +1819,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level2_33__compile_error__d63b694a",
-   "stem": "kernelbench_level2_33__compile_error__d63b694a",
-   "task_id_base": "kernelbench_level2_33",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_33__compile_error__d63b694a/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "d63b694a178c83a5"
-   }
-  },
-  {
    "task_id": "kernelbench_level2_34__compile_error__1331a85f",
    "stem": "kernelbench_level2_34__compile_error__1331a85f",
    "task_id_base": "kernelbench_level2_34",
@@ -2025,17 +1827,6 @@
     "code_path": "data/kernelbench_level2_34__compile_error__1331a85f/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "1331a85f3b52161f"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_37__compile_error__07ff80cc",
-   "stem": "kernelbench_level2_37__compile_error__07ff80cc",
-   "task_id_base": "kernelbench_level2_37",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_37__compile_error__07ff80cc/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "07ff80cc3216058b"
    }
   },
   {
@@ -2061,17 +1852,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level2_41__compile_error__d8526e09",
-   "stem": "kernelbench_level2_41__compile_error__d8526e09",
-   "task_id_base": "kernelbench_level2_41",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_41__compile_error__d8526e09/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "d8526e09de78cb1b"
-   }
-  },
-  {
    "task_id": "kernelbench_level2_44__logic_error__ba472546",
    "stem": "kernelbench_level2_44__logic_error__ba472546",
    "task_id_base": "kernelbench_level2_44",
@@ -2091,17 +1871,6 @@
     "code_path": "data/kernelbench_level2_47__compile_error__5f790bcd/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "5f790bcdb099c64d"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_51__compile_error__8f71193c",
-   "stem": "kernelbench_level2_51__compile_error__8f71193c",
-   "task_id_base": "kernelbench_level2_51",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_51__compile_error__8f71193c/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "8f71193c1fd6fefa"
    }
   },
   {
@@ -2171,17 +1940,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level2_67__compile_error__eb5a5e13",
-   "stem": "kernelbench_level2_67__compile_error__eb5a5e13",
-   "task_id_base": "kernelbench_level2_67",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_67__compile_error__eb5a5e13/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "eb5a5e13d7fd8642"
-   }
-  },
-  {
    "task_id": "kernelbench_level2_72__logic_error__a325074f",
    "stem": "kernelbench_level2_72__logic_error__a325074f",
    "task_id_base": "kernelbench_level2_72",
@@ -2190,17 +1948,6 @@
     "code_path": "data/kernelbench_level2_72__logic_error__a325074f/broken_start.cu",
     "error_category": "logic_error",
     "code_hash": "a325074f63e5b122"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_73__compile_error__50a85dc1",
-   "stem": "kernelbench_level2_73__compile_error__50a85dc1",
-   "task_id_base": "kernelbench_level2_73",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_73__compile_error__50a85dc1/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "50a85dc10d23fef5"
    }
   },
   {
@@ -2237,17 +1984,6 @@
    }
   },
   {
-   "task_id": "kernelbench_level2_83__compile_error__cef3dd8c",
-   "stem": "kernelbench_level2_83__compile_error__cef3dd8c",
-   "task_id_base": "kernelbench_level2_83",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_83__compile_error__cef3dd8c/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "cef3dd8c7ca3c38b"
-   }
-  },
-  {
    "task_id": "kernelbench_level2_85__compile_error__4719c48f",
    "stem": "kernelbench_level2_85__compile_error__4719c48f",
    "task_id_base": "kernelbench_level2_85",
@@ -2256,17 +1992,6 @@
     "code_path": "data/kernelbench_level2_85__compile_error__4719c48f/broken_start.cu",
     "error_category": "compile_error",
     "code_hash": "4719c48f5e188467"
-   }
-  },
-  {
-   "task_id": "kernelbench_level2_91__compile_error__283c75d2",
-   "stem": "kernelbench_level2_91__compile_error__283c75d2",
-   "task_id_base": "kernelbench_level2_91",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/kernelbench_level2_91__compile_error__283c75d2/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "283c75d2c6ebad32"
    }
   },
   {

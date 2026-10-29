@@ -2,7 +2,7 @@
 
 ## Instance layout
 
-Each of the 228 instances lives in `data/<instance_id>/` where
+Each of the 203 instances lives in `data/<instance_id>/` where
 `instance_id = <base_stem>__<error_category>__<hash8>`:
 
 ```
@@ -14,7 +14,7 @@ reference.*      reference implementation (see per-family semantics below)
 testbench/       task-specific build+test harness
 ```
 
-`benchmark/task_list.json` is the canonical index: 228 entries keyed by the
+`benchmark/task_list.json` is the canonical index: 203 entries keyed by the
 full instance id. **Do not key by base stem** — 18 stems have two instances
 (different broken starts of the same underlying task); `task_id_base` is
 provided for grouping only. The flat dirs `data/{input,prompts,testbench,

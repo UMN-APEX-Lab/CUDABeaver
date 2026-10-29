@@ -1,24 +1,24 @@
 {
   "version": "1.0.0",
-  "n_instances": 228,
+  "n_instances": 203,
   "license": "CC BY 4.0",
   "schema_version": "neurips2026_v1",
   "task_families": {
-    "cublas": 3,
-    "cuda": 60,
+    "cublas": 2,
+    "cuda": 55,
     "cudabench": 5,
-    "cufft": 2,
+    "cufft": 1,
     "cufft_samples": 9,
-    "cusolver": 10,
-    "cusparse": 6,
+    "cusolver": 7,
+    "cusparse": 5,
     "cutlass": 20,
     "flashattention": 10,
-    "kernelbench": 84,
+    "kernelbench": 69,
     "layernorm": 16,
     "thunderkittens": 4
   },
   "error_category_distribution": {
-    "compile_error": 105,
+    "compile_error": 80,
     "logic_error": 45,
     "memory_crash": 32,
     "perf_broken": 41,
@@ -42,24 +42,6 @@
       "difficulty": "medium",
       "broken_start_lines": 102,
       "broken_start_hash": "8996b0991275c900"
-    },
-    {
-      "id": "cublas_level1_10__compile_error__d6b7227b",
-      "path": "data/cublas_level1_10__compile_error__d6b7227b/",
-      "task_family": "cublas",
-      "error_category": "compile_error",
-      "difficulty": "easy",
-      "broken_start_lines": 61,
-      "broken_start_hash": "d6b7227b8d7efccc"
-    },
-    {
-      "id": "cuda_104__compile_error__f8160fc8",
-      "path": "data/cuda_104__compile_error__f8160fc8/",
-      "task_family": "cuda",
-      "error_category": "compile_error",
-      "difficulty": "easy",
-      "broken_start_lines": 29,
-      "broken_start_hash": "f8160fc8b8e813fd"
     },
     {
       "id": "cuda_107__compile_error__3c9d404e",
@@ -150,15 +132,6 @@
       "difficulty": "medium",
       "broken_start_lines": 76,
       "broken_start_hash": "a7b4a675337c53dd"
-    },
-    {
-      "id": "cuda_137__compile_error__df17e5f1",
-      "path": "data/cuda_137__compile_error__df17e5f1/",
-      "task_family": "cuda",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 107,
-      "broken_start_hash": "df17e5f1b971138f"
     },
     {
       "id": "cuda_137__memory_crash__9b14b4ef",
@@ -503,15 +476,6 @@
       "broken_start_hash": "96f90a9e648cdda6"
     },
     {
-      "id": "cuda_22__compile_error__4d18e637",
-      "path": "data/cuda_22__compile_error__4d18e637/",
-      "task_family": "cuda",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 35,
-      "broken_start_hash": "4d18e637392d52a8"
-    },
-    {
       "id": "cuda_230__logic_error__29f5516e",
       "path": "data/cuda_230__logic_error__29f5516e/",
       "task_family": "cuda",
@@ -557,15 +521,6 @@
       "broken_start_hash": "manual_v1"
     },
     {
-      "id": "cuda_70__compile_error__701905b0",
-      "path": "data/cuda_70__compile_error__701905b0/",
-      "task_family": "cuda",
-      "error_category": "compile_error",
-      "difficulty": "easy",
-      "broken_start_lines": 20,
-      "broken_start_hash": "701905b0b31d8da8"
-    },
-    {
       "id": "cuda_87__compile_error__0e66ba5e",
       "path": "data/cuda_87__compile_error__0e66ba5e/",
       "task_family": "cuda",
@@ -573,15 +528,6 @@
       "difficulty": "medium",
       "broken_start_lines": 25,
       "broken_start_hash": "c7a5b788e02b92df"
-    },
-    {
-      "id": "cuda_89__compile_error__3c452655",
-      "path": "data/cuda_89__compile_error__3c452655/",
-      "task_family": "cuda",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 40,
-      "broken_start_hash": "3c452655e5ddd78f"
     },
     {
       "id": "cuda_8__compile_error__93ac06fc",
@@ -636,15 +582,6 @@
       "difficulty": "medium",
       "broken_start_lines": 118,
       "broken_start_hash": "32cc9e410a2e73ca"
-    },
-    {
-      "id": "cufft_1__compile_error__611168ad",
-      "path": "data/cufft_1__compile_error__611168ad/",
-      "task_family": "cufft",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 99,
-      "broken_start_hash": "611168adc89103b8"
     },
     {
       "id": "cufft_6__compile_error__04f115a2",
@@ -764,15 +701,6 @@
       "broken_start_hash": "8adf60794c1d7d17"
     },
     {
-      "id": "cusolver_19__compile_error__812bccf2",
-      "path": "data/cusolver_19__compile_error__812bccf2/",
-      "task_family": "cusolver",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 165,
-      "broken_start_hash": "812bccf29a2b2221"
-    },
-    {
       "id": "cusolver_22__compile_error__f16664b9",
       "path": "data/cusolver_22__compile_error__f16664b9/",
       "task_family": "cusolver",
@@ -789,15 +717,6 @@
       "difficulty": "medium",
       "broken_start_lines": 145,
       "broken_start_hash": "5d0216dab893756b"
-    },
-    {
-      "id": "cusolver_26__compile_error__134e9d37",
-      "path": "data/cusolver_26__compile_error__134e9d37/",
-      "task_family": "cusolver",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 172,
-      "broken_start_hash": "134e9d37b0e58018"
     },
     {
       "id": "cusolver_28__compile_error__0246128d",
@@ -818,15 +737,6 @@
       "broken_start_hash": "c97e7eef10b0efc2"
     },
     {
-      "id": "cusolver_6__compile_error__5e024f61",
-      "path": "data/cusolver_6__compile_error__5e024f61/",
-      "task_family": "cusolver",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 141,
-      "broken_start_hash": "5e024f61da5a7824"
-    },
-    {
       "id": "cusparse_26__compile_error__67ec6d6b",
       "path": "data/cusparse_26__compile_error__67ec6d6b/",
       "task_family": "cusparse",
@@ -843,15 +753,6 @@
       "difficulty": "medium",
       "broken_start_lines": 132,
       "broken_start_hash": "2612d349ccf22a62"
-    },
-    {
-      "id": "cusparse_2__compile_error__5aa181ca",
-      "path": "data/cusparse_2__compile_error__5aa181ca/",
-      "task_family": "cusparse",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 93,
-      "broken_start_hash": "5aa181ca9889fef6"
     },
     {
       "id": "cusparse_4__compile_error__cfcd99f6",
@@ -1529,24 +1430,6 @@
       "broken_start_hash": "ad1587f924f128e2"
     },
     {
-      "id": "kernelbench_level1_93__compile_error__9cc201b6",
-      "path": "data/kernelbench_level1_93__compile_error__9cc201b6/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 111,
-      "broken_start_hash": "9cc201b604c57062"
-    },
-    {
-      "id": "kernelbench_level1_94__compile_error__18d598a4",
-      "path": "data/kernelbench_level1_94__compile_error__18d598a4/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 150,
-      "broken_start_hash": "18d598a41f829841"
-    },
-    {
       "id": "kernelbench_level1_97__timeout__f0036e46",
       "path": "data/kernelbench_level1_97__timeout__f0036e46/",
       "task_family": "kernelbench",
@@ -1592,15 +1475,6 @@
       "broken_start_hash": "9cd05fb2775e6c60"
     },
     {
-      "id": "kernelbench_level2_15__compile_error__16c7784d",
-      "path": "data/kernelbench_level2_15__compile_error__16c7784d/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 128,
-      "broken_start_hash": "16c7784dd8ca28bc"
-    },
-    {
       "id": "kernelbench_level2_19__compile_error__9a45fbb0",
       "path": "data/kernelbench_level2_19__compile_error__9a45fbb0/",
       "task_family": "kernelbench",
@@ -1617,33 +1491,6 @@
       "difficulty": "medium",
       "broken_start_lines": 170,
       "broken_start_hash": "31cb416e8cc6ffe2"
-    },
-    {
-      "id": "kernelbench_level2_23__compile_error__b2c65431",
-      "path": "data/kernelbench_level2_23__compile_error__b2c65431/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 183,
-      "broken_start_hash": "b2c65431e7b71e6c"
-    },
-    {
-      "id": "kernelbench_level2_28__compile_error__3924bbe7",
-      "path": "data/kernelbench_level2_28__compile_error__3924bbe7/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 135,
-      "broken_start_hash": "3924bbe70b34eacd"
-    },
-    {
-      "id": "kernelbench_level2_29__compile_error__2ef81608",
-      "path": "data/kernelbench_level2_29__compile_error__2ef81608/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 134,
-      "broken_start_hash": "2ef81608dda9823f"
     },
     {
       "id": "kernelbench_level2_31__compile_error__3ae77b08",
@@ -1664,15 +1511,6 @@
       "broken_start_hash": "0d61a4a474f13eff"
     },
     {
-      "id": "kernelbench_level2_33__compile_error__d63b694a",
-      "path": "data/kernelbench_level2_33__compile_error__d63b694a/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 121,
-      "broken_start_hash": "d63b694a178c83a5"
-    },
-    {
       "id": "kernelbench_level2_34__compile_error__1331a85f",
       "path": "data/kernelbench_level2_34__compile_error__1331a85f/",
       "task_family": "kernelbench",
@@ -1680,15 +1518,6 @@
       "difficulty": "medium",
       "broken_start_lines": 139,
       "broken_start_hash": "1331a85f3b52161f"
-    },
-    {
-      "id": "kernelbench_level2_37__compile_error__07ff80cc",
-      "path": "data/kernelbench_level2_37__compile_error__07ff80cc/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 103,
-      "broken_start_hash": "07ff80cc3216058b"
     },
     {
       "id": "kernelbench_level2_3__compile_error__dd4f6cf7",
@@ -1709,15 +1538,6 @@
       "broken_start_hash": "dbf34be4e6fc68d5"
     },
     {
-      "id": "kernelbench_level2_41__compile_error__d8526e09",
-      "path": "data/kernelbench_level2_41__compile_error__d8526e09/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 128,
-      "broken_start_hash": "d8526e09de78cb1b"
-    },
-    {
       "id": "kernelbench_level2_44__logic_error__ba472546",
       "path": "data/kernelbench_level2_44__logic_error__ba472546/",
       "task_family": "kernelbench",
@@ -1734,15 +1554,6 @@
       "difficulty": "medium",
       "broken_start_lines": 93,
       "broken_start_hash": "5f790bcdb099c64d"
-    },
-    {
-      "id": "kernelbench_level2_51__compile_error__8f71193c",
-      "path": "data/kernelbench_level2_51__compile_error__8f71193c/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 146,
-      "broken_start_hash": "8f71193c1fd6fefa"
     },
     {
       "id": "kernelbench_level2_52__compile_error__e62e980c",
@@ -1799,15 +1610,6 @@
       "broken_start_hash": "b2e2d4fa4838918f"
     },
     {
-      "id": "kernelbench_level2_67__compile_error__eb5a5e13",
-      "path": "data/kernelbench_level2_67__compile_error__eb5a5e13/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 126,
-      "broken_start_hash": "eb5a5e13d7fd8642"
-    },
-    {
       "id": "kernelbench_level2_72__logic_error__a325074f",
       "path": "data/kernelbench_level2_72__logic_error__a325074f/",
       "task_family": "kernelbench",
@@ -1815,15 +1617,6 @@
       "difficulty": "medium",
       "broken_start_lines": 138,
       "broken_start_hash": "a325074f63e5b122"
-    },
-    {
-      "id": "kernelbench_level2_73__compile_error__50a85dc1",
-      "path": "data/kernelbench_level2_73__compile_error__50a85dc1/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 127,
-      "broken_start_hash": "50a85dc10d23fef5"
     },
     {
       "id": "kernelbench_level2_74__compile_error__42066924",
@@ -1853,15 +1646,6 @@
       "broken_start_hash": "f3b7b2e025336397"
     },
     {
-      "id": "kernelbench_level2_83__compile_error__cef3dd8c",
-      "path": "data/kernelbench_level2_83__compile_error__cef3dd8c/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 119,
-      "broken_start_hash": "cef3dd8c7ca3c38b"
-    },
-    {
       "id": "kernelbench_level2_85__compile_error__4719c48f",
       "path": "data/kernelbench_level2_85__compile_error__4719c48f/",
       "task_family": "kernelbench",
@@ -1869,15 +1653,6 @@
       "difficulty": "medium",
       "broken_start_lines": 194,
       "broken_start_hash": "4719c48f5e188467"
-    },
-    {
-      "id": "kernelbench_level2_91__compile_error__283c75d2",
-      "path": "data/kernelbench_level2_91__compile_error__283c75d2/",
-      "task_family": "kernelbench",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 167,
-      "broken_start_hash": "283c75d2c6ebad32"
     },
     {
       "id": "kernelbench_level2_92__compile_error__44782661",

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "n_instances": 203,
+  "n_instances": 199,
   "license": "CC BY 4.0",
   "schema_version": "neurips2026_v1",
   "task_families": {
@@ -14,11 +14,10 @@
     "cutlass": 20,
     "flashattention": 10,
     "kernelbench": 69,
-    "layernorm": 16,
-    "thunderkittens": 4
+    "layernorm": 16
   },
   "error_category_distribution": {
-    "compile_error": 80,
+    "compile_error": 76,
     "logic_error": 45,
     "memory_crash": 32,
     "perf_broken": 41,
@@ -1815,42 +1814,6 @@
       "difficulty": "medium",
       "broken_start_lines": 159,
       "broken_start_hash": "31ad0407bf0e5999"
-    },
-    {
-      "id": "thunderkittens_based_linear_attn__compile_error__b80b51d7",
-      "path": "data/thunderkittens_based_linear_attn__compile_error__b80b51d7/",
-      "task_family": "thunderkittens",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 425,
-      "broken_start_hash": "b80b51d751e8a67f"
-    },
-    {
-      "id": "thunderkittens_flux_flux_gate__compile_error__b63589a7",
-      "path": "data/thunderkittens_flux_flux_gate__compile_error__b63589a7/",
-      "task_family": "thunderkittens",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 477,
-      "broken_start_hash": "b63589a778f5767d"
-    },
-    {
-      "id": "thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5",
-      "path": "data/thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5/",
-      "task_family": "thunderkittens",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 516,
-      "broken_start_hash": "cf6e9fb5ad8af91e"
-    },
-    {
-      "id": "thunderkittens_mamba2_mamba2__compile_error__b21a7957",
-      "path": "data/thunderkittens_mamba2_mamba2__compile_error__b21a7957/",
-      "task_family": "thunderkittens",
-      "error_category": "compile_error",
-      "difficulty": "medium",
-      "broken_start_lines": 298,
-      "broken_start_hash": "b21a7957907b0190"
     }
   ]
 }

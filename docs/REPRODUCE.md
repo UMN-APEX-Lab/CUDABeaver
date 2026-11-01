@@ -41,10 +41,9 @@ need additional setup; all required code/headers are bundled:
 
 | Family                                  | n  | Bundled at                                          |
 |-----------------------------------------|----|-----------------------------------------------------|
-| cuda, cublas, cufft, cusolver, cusparse | 70 | (nvcc only)                                         |
+| cuda, cudabench, cublas, cufft, cusolver, cusparse | 75 | (nvcc only)                                         |
 | cutlass                                 | 20 | `data/_external/cutlass`     |
-| thunderkittens                          |  4 | testbench self-contained + bundled fallback         |
-| kernelbench                             | 84 | `harness/_vendor/kernelbench/` (registered via .pth)|
+| kernelbench                             | 69 | `harness/_vendor/kernelbench/` (registered via .pth)|
 | flashattention, layernorm, cufft_samples| 35 | `harness/applied_kernels_runner/` + reference_sources |
 
 ## Reproducing tables

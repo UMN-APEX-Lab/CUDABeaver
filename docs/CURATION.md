@@ -17,7 +17,8 @@ bundled in this release).
 | 8. v3 supplement | +16 | memory-crash instances harvested from v1 iterations |
 | 9. paper corpus | 213 ✓ | 200 + 16 − 3 exact-duplicate broken starts |
 | 10. post-submission release | 228 ✓ | post-submission memory-crash expansion (+20/−4, incl. new cudabench family) and per-task fixes |
-| 11. this release | 203 ✓ | −25 `compile_error` broken starts that build and pass the testbench unmodified (re-verified on RTX PRO 6000 Blackwell, CUDA 13.0); their curation-time failure did not reproduce |
+| 11. dead-start cleanup | 203 ✓ | −25 `compile_error` broken starts that build and pass the testbench unmodified (re-verified on RTX PRO 6000 Blackwell, CUDA 13.0); their curation-time failure did not reproduce |
+| 12. this release | 199 ✓ | −4 ThunderKittens `compile_error` instances (wgmma kernels exist only in TK's sm_90a branch, so they cannot build on the Blackwell evaluation GPU) |
 
 Notes on the record: per-source rejection counts for stage 0→1
 and the intermediate 240-case artifact of stage 1 were not preserved; the

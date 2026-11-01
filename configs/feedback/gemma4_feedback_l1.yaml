@@ -204,10 +204,6 @@ experiment:
   - "kernelbench_level2_85__compile_error__4719c48f"
   - "kernelbench_level2_92__compile_error__44782661"
   - "kernelbench_level2_96__compile_error__fbde8731"
-  - "thunderkittens_based_linear_attn__compile_error__b80b51d7"
-  - "thunderkittens_flux_flux_gate__compile_error__b63589a7"
-  - "thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5"
-  - "thunderkittens_mamba2_mamba2__compile_error__b21a7957"
 build:
   workdir: /tmp/cuda_debugger_v2_gemma4_feedback_l1
   timeout: 300

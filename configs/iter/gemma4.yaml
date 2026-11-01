@@ -170,10 +170,6 @@ experiment:
     - "kernelbench_level2_85"
     - "kernelbench_level2_92"
     - "kernelbench_level2_96"
-    - "thunderkittens_based_linear_attn"
-    - "thunderkittens_flux_flux_gate"
-    - "thunderkittens_linear_attention_linear_attention"
-    - "thunderkittens_mamba2_mamba2"
 build:
   timeout: 120                # nvcc / make / pybind11 build
   test_timeout: 300           # cuda_event timing or applied-kernels ./test

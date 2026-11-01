@@ -1,7 +1,7 @@
 {
  "_doc": "Full-instance-id keyed task list: task_id = stem = data/ dir name. Base stems are ambiguous for 18 duplicated stems; do not key by them.",
  "schema_version": "task_list/2.0-fullid",
- "n_total": 203,
+ "n_total": 199,
  "entries": [
   {
    "task_id": "cublas_applications_154__compile_error__83af4bad",
@@ -2190,50 +2190,6 @@
     "code_path": "data/layernorm_parallel_fwd_8192__perf_broken__31ad0407/broken_start.cu",
     "error_category": "perf_broken",
     "code_hash": "31ad0407bf0e5999"
-   }
-  },
-  {
-   "task_id": "thunderkittens_based_linear_attn__compile_error__b80b51d7",
-   "stem": "thunderkittens_based_linear_attn__compile_error__b80b51d7",
-   "task_id_base": "thunderkittens_based_linear_attn",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/thunderkittens_based_linear_attn__compile_error__b80b51d7/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "b80b51d751e8a67f"
-   }
-  },
-  {
-   "task_id": "thunderkittens_flux_flux_gate__compile_error__b63589a7",
-   "stem": "thunderkittens_flux_flux_gate__compile_error__b63589a7",
-   "task_id_base": "thunderkittens_flux_flux_gate",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/thunderkittens_flux_flux_gate__compile_error__b63589a7/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "b63589a778f5767d"
-   }
-  },
-  {
-   "task_id": "thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5",
-   "stem": "thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5",
-   "task_id_base": "thunderkittens_linear_attention_linear_attention",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/thunderkittens_linear_attention_linear_attention__compile_error__cf6e9fb5/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "cf6e9fb5ad8af91e"
-   }
-  },
-  {
-   "task_id": "thunderkittens_mamba2_mamba2__compile_error__b21a7957",
-   "stem": "thunderkittens_mamba2_mamba2__compile_error__b21a7957",
-   "task_id_base": "thunderkittens_mamba2_mamba2",
-   "source": "curated",
-   "broken_start": {
-    "code_path": "data/thunderkittens_mamba2_mamba2__compile_error__b21a7957/broken_start.cu",
-    "error_category": "compile_error",
-    "code_hash": "b21a7957907b0190"
    }
   }
  ]

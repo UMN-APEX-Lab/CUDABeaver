@@ -46,7 +46,7 @@
   },
   "@type": "sc:Dataset",
   "name": "CUDABeaver",
-  "description": "CUDABeaver is a benchmark of 203 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 12 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, ThunderKittens, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion dataset of the NeurIPS 2026 Evaluations and Datasets Track paper \"CUDABeaver: Benchmarking LLM-Based Automated CUDA Debugging\".",
+  "description": "CUDABeaver is a benchmark of 199 reproducible CUDA debugging cases for evaluating LLM-based automated kernel repair. Each task starts from a real failing CUDA workspace (broken kernel + raw error log + native build/test harness) and is labeled with one of 5 curation-time error-category buckets (compile_error, logic_error, memory_crash, perf_broken, timeout), collapsed from an 8-category per-iteration classifier (compile_error, integration, environment_dependency, illegal_memory_access, out_of_memory, timeout, functional_correctness, perf_broken). The corpus spans 11 kernel families across two tiers: NVIDIA-library/curated (KernelBench, CUDA samples, CUDABench, cuSOLVER, cuSPARSE, cuBLAS, cuFFT, LayerNorm) and frontier-kernel (CUTLASS, FlashAttention v2). Designed for measuring debugging ability distinct from kernel generation, with support for performance-preservation evaluation. Companion dataset of the NeurIPS 2026 Evaluations and Datasets Track paper \"CUDABeaver: Benchmarking LLM-Based Automated CUDA Debugging\".",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "url": "https://github.com/UMN-APEX-Lab/CUDABeaver",
   "version": "1.0.0",
@@ -88,7 +88,7 @@
       "@type": "cr:RecordSet",
       "@id": "instances",
       "name": "instances",
-      "description": "203 broken-kernel instances.",
+      "description": "199 broken-kernel instances.",
       "field": [
         {
           "@type": "cr:Field",
@@ -214,7 +214,7 @@
   "rai:annotationsPerItem": "1 annotation per instance (deterministic)",
   "rai:annotatorDemographics": "N/A - automated annotation only",
   "rai:machineAnnotationTools": "Custom Python classifier; nvcc / KernelBench eval_kernel_against_ref for build+test-based category assignment",
-  "rai:dataBiases": "(a) Source LLM bias: broken_starts inherit failure-mode distributions of source models, biased toward common LLM mistakes. (b) Domain bias: 12 task families, weighted toward CUDA C++ + KernelBench Python; under-represents OpenCL, ROCm, Triton. (c) Difficulty skew: harder tiers (L4-L5) cluster in compile_error / memory_crash; easier tiers (L1) dominate logic_error.",
+  "rai:dataBiases": "(a) Source LLM bias: broken_starts inherit failure-mode distributions of source models, biased toward common LLM mistakes. (b) Domain bias: 11 task families, weighted toward CUDA C++ + KernelBench Python; under-represents OpenCL, ROCm, Triton. (c) Difficulty skew: harder tiers (L4-L5) cluster in compile_error / memory_crash; easier tiers (L1) dominate logic_error.",
   "rai:dataUseCases": "Evaluating LLM debugging capability on GPU kernels. Comparing test-time strategies. Studying feedback-richness, history-depth, few-shot exemplar effects.",
   "rai:dataLimitations": "Single-iteration debugging only - does not measure long-horizon (>5 round) repair. Main evaluation on an NVIDIA RTX PRO 6000 Blackwell GPU, with a replication on an NVIDIA H200 (Hopper). Not a measure of from-scratch kernel generation. Performance numbers are hardware-specific. License note: dataset curation is released under CC-BY 4.0; upstream-derived instances retain their original licenses (CUTLASS, FlashAttention v2: BSD-3-Clause; KernelBench, ThunderKittens: MIT). Per-instance license metadata is in instance.json.",
   "rai:dataSocialImpact": "Low risk. Benchmark contains only public-domain CUDA programming patterns. No personal data. Dual-use: improved LLM debugging could accelerate GPU code generation.",

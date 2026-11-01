@@ -4,12 +4,12 @@
   <img src="assets/repair.png" alt="CUDABeaver: LLM-driven CUDA kernel repair pipeline" width="100%">
 </p>
 
-A benchmark of **203 broken CUDA kernels** paired with reference
+A benchmark of **199 broken CUDA kernels** paired with reference
 implementations and runnable testbenches, designed to evaluate large
 language model (LLM) debugging capability on GPU kernel code.
 
 This single repository ships **everything** end-to-end:
-- the 203-instance dataset under `data/` (broken_start + reference + testbench + per-instance metadata),
+- the 199-instance dataset under `data/` (broken_start + reference + testbench + per-instance metadata),
 - the evaluation harness (`harness/`) that drives the gen → build → test → score loop,
 - the analysis pipeline (`analysis/`) that produces every paper table,
 - 238 evaluation configs (`configs/`) covering 5 axes (iter / repeated / feedback / history / fewshot),
@@ -84,20 +84,20 @@ scripts/                   one-time setup + utilities
   post_conda_setup.sh        register vendored kernelbench in conda env (one-time)
   migrate_full_id_keying.py  documented migration to full-instance-id keying
 
-data/                      dataset (203 instances)
+data/                      dataset (199 instances)
   <instance_id>/             per-instance broken_start + reference + testbench + metadata
   _external/                 bundled CUTLASS (BSD-3) + ThunderKittens (MIT) headers
 
 benchmark/                 canonical task list + timing baselines
-  task_list.json             203 full-instance-id entries (used by --mode debug)
-  references/                168 per-instance reference timing specs
-  references_cache/          measured baselines: Blackwell sm_120 + H200 sm_90
+  task_list.json             199 full-instance-id entries (used by --mode debug)
+  references/                144 per-instance reference timing specs
+  references_cache/          measured baselines: Blackwell sm_120
 docs/                      PROTOCOL, PERF_PROTOCOL, REPRODUCE,
                            DATA_SCHEMA (family semantics), CURATION (funnel)
 tests/                     smoke + per-family install fixtures (no LLM key)
 examples/                  pointers to reproduction walk-throughs (docs/REPRODUCE.md)
 
-manifest.json              top-level index over the 203 instances
+manifest.json              top-level index over the 199 instances
 croissant.json             Croissant 1.0 metadata + 22 RAI fields (RAI 1.0)
 README.md                  this file
 LICENSE                    CC BY 4.0
@@ -109,10 +109,10 @@ LICENSE                    CC BY 4.0
 
 ### Dataset summary
 
-The benchmark consists of 203 instances across 12 task families spanning the
+The benchmark consists of 199 instances across 11 task families spanning the
 breadth of GPU programming workloads — from low-level cuBLAS / cuFFT /
 cuSOLVER / cuSPARSE library calls to high-performance attention kernels
-(FlashAttention, ThunderKittens) and CUTLASS GEMM tile schedules. Each
+(FlashAttention) and CUTLASS GEMM tile schedules. Each
 instance pairs an LLM-generated broken implementation with the canonical
 reference and a runnable testbench that detects whichever of five failure
 modes the bug induces (compile_error, logic_error, memory_crash, perf_broken,
@@ -176,7 +176,7 @@ Top-level files:
 
 ```
 data/_external/        Bundled CUTLASS + ThunderKittens headers (BSD-3 / MIT)
-manifest.json          Index over all 203 instances (compact entry per instance)
+manifest.json          Index over all 199 instances (compact entry per instance)
 croissant.json         Croissant 1.0 metadata + 22 RAI fields (RAI 1.0)
 LICENSE                CC BY 4.0
 ```
@@ -203,10 +203,10 @@ architecture-specific requirements.
 
 #### Data splits
 
-The dataset is released as a **single split** (203 instances). The companion
+The dataset is released as a **single split** (199 instances). The companion
 paper evaluates each instance under multiple cfgs (iter, repeated, feedback
 L0–L4, history H1–H4, fewshot K1–K5); these are evaluation axes, not
-splits — every cfg sees the same 203 instances.
+splits — every cfg sees the same 199 instances.
 
 #### Composition
 
@@ -223,9 +223,8 @@ splits — every cfg sees the same 203 instances.
 | `flashattention` | 10 | FlashAttention-2 forward / backward / split kernels |
 | `layernorm` | 16 | Forward / backward LayerNorm + parallel variants |
 | `kernelbench` | 69 | KernelBench level-1 + level-2 PyTorch-extension kernels |
-| `thunderkittens` | 4 | ThunderKittens linear-attn / mamba2 / based / flux kernels |
 
-Error category distribution: `compile_error` 80, `logic_error` 45,
+Error category distribution: `compile_error` 76, `logic_error` 45,
 `perf_broken` 41, `memory_crash` 32, `timeout` 5.
 
 ### Dataset creation
@@ -235,7 +234,7 @@ Error category distribution: `compile_error` 80, `logic_error` 45,
 LLMs are increasingly deployed for low-level GPU programming, but standard
 code-evaluation benchmarks measure code generation from scratch — not the
 practical setting where a developer asks an LLM to fix existing broken code.
-This benchmark fills that gap by providing 203 *real* failure modes
+This benchmark fills that gap by providing 199 *real* failure modes
 (generated by frontier LLMs themselves on GPU kernel tasks) paired with
 ground-truth references and runnable testbenches.
 
@@ -354,13 +353,11 @@ All required code/headers are bundled — most instances build with just
 |-----------------------------------------|----|-----------------------------------------------------|
 | cuda, cudabench, cublas, cufft, cusolver, cusparse | 75 | (nvcc only)                                         |
 | cutlass                                 | 20 | `data/_external/cutlass`                            |
-| thunderkittens                          |  4 | testbench self-contained + bundled fallback         |
 | kernelbench                             | 69 | `harness/_vendor/kernelbench/` (registered via .pth)|
 | flashattention, layernorm, cufft_samples| 35 | `harness/applied_kernels_runner/` + reference_sources |
 
-**Total: 203 instances**, buildable on CUDA 12.8+ or 13 (see the
-build-audit table in `docs/REPRODUCE.md`); the 4 ThunderKittens `sm_90a`
-kernels require a Hopper GPU and are skipped on other architectures.
+**Total: 199 instances**, buildable on CUDA 12.8+ or 13 (see the
+build-audit table in `docs/REPRODUCE.md`).
 
 ---
 

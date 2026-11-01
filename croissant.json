@@ -6,7 +6,6 @@
     "column": "cr:column",
     "conformsTo": "dct:conformsTo",
     "cr": "http://mlcommons.org/croissant/",
-    "rai": "http://mlcommons.org/croissant/RAI/",
     "data": {
       "@id": "cr:data",
       "@type": "@json"
@@ -16,14 +15,15 @@
       "@type": "@vocab"
     },
     "dct": "http://purl.org/dc/terms/",
+    "equivalentProperty": "cr:equivalentProperty",
     "examples": {
       "@id": "cr:examples",
       "@type": "@json"
     },
     "extract": "cr:extract",
     "field": "cr:field",
-    "fileProperty": "cr:fileProperty",
     "fileObject": "cr:fileObject",
+    "fileProperty": "cr:fileProperty",
     "fileSet": "cr:fileSet",
     "format": "cr:format",
     "includes": "cr:includes",
@@ -33,11 +33,14 @@
     "md5": "cr:md5",
     "parentField": "cr:parentField",
     "path": "cr:path",
+    "prov": "http://www.w3.org/ns/prov#",
+    "rai": "http://mlcommons.org/croissant/RAI/",
     "recordSet": "cr:recordSet",
     "references": "cr:references",
     "regex": "cr:regex",
     "repeated": "cr:repeated",
     "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
     "sc": "https://schema.org/",
     "separator": "cr:separator",
     "source": "cr:source",
@@ -78,9 +81,52 @@
       "@type": "cr:FileObject",
       "@id": "manifest.json",
       "name": "manifest.json",
+      "description": "Index of all 199 instances with family, error category, difficulty and broken_start hash.",
       "encodingFormat": "application/json",
       "contentUrl": "https://raw.githubusercontent.com/UMN-APEX-Lab/CUDABeaver/main/manifest.json",
-      "sha256": "a3694a088c27b1908348bfca56c8ef374cf3c4d4f97c16848bf3ffb7af4a9ecf"
+      "sha256": "4988654093a420718e45edc6a05666917e25e304d07d676898687b46d2db8409"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "github-repository",
+      "name": "github-repository",
+      "description": "The CUDABeaver GitHub repository; per-instance files live under data/<instance_id>/.",
+      "contentUrl": "https://github.com/UMN-APEX-Lab/CUDABeaver",
+      "encodingFormat": "git+https",
+      "sha256": "main"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "broken-start-files",
+      "name": "broken-start-files",
+      "description": "The broken kernel each instance starts from (the code to be repaired).",
+      "containedIn": {
+        "@id": "github-repository"
+      },
+      "encodingFormat": "text/plain",
+      "includes": "data/*__????????/broken_start.*"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "reference-files",
+      "name": "reference-files",
+      "description": "Reference implementation per instance (see docs/DATA_SCHEMA.md for per-family semantics).",
+      "containedIn": {
+        "@id": "github-repository"
+      },
+      "encodingFormat": "text/plain",
+      "includes": "data/*__????????/reference.*"
+    },
+    {
+      "@type": "cr:FileSet",
+      "@id": "prompt-files",
+      "name": "prompt-files",
+      "description": "Repair prompt shown to the model.",
+      "containedIn": {
+        "@id": "github-repository"
+      },
+      "encodingFormat": "text/plain",
+      "includes": "data/*__????????/prompt.txt"
     }
   ],
   "recordSet": [
@@ -194,6 +240,120 @@
           "description": "Relative path under data/ to this instance's per-file directory; broken_start.{cu,py,h}, reference.{cu,py}, prompt.txt, input.json (build/test commands), instance.json, and testbench/ live there."
         }
       ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "broken_starts",
+      "name": "broken_starts",
+      "description": "Source code of every broken start.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "broken_starts/path",
+          "name": "path",
+          "description": "File path; its parent directory name is the instance id.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "broken-start-files"
+            },
+            "extract": {
+              "fileProperty": "filepath"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "broken_starts/content",
+          "name": "content",
+          "description": "File contents.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "broken-start-files"
+            },
+            "extract": {
+              "fileProperty": "content"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "references",
+      "name": "references",
+      "description": "Source code of every reference implementation.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "references/path",
+          "name": "path",
+          "description": "File path; its parent directory name is the instance id.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "reference-files"
+            },
+            "extract": {
+              "fileProperty": "filepath"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "references/content",
+          "name": "content",
+          "description": "File contents.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "reference-files"
+            },
+            "extract": {
+              "fileProperty": "content"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "cr:RecordSet",
+      "@id": "prompts",
+      "name": "prompts",
+      "description": "Repair prompt of every instance.",
+      "field": [
+        {
+          "@type": "cr:Field",
+          "@id": "prompts/path",
+          "name": "path",
+          "description": "File path; its parent directory name is the instance id.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "prompt-files"
+            },
+            "extract": {
+              "fileProperty": "filepath"
+            }
+          }
+        },
+        {
+          "@type": "cr:Field",
+          "@id": "prompts/content",
+          "name": "content",
+          "description": "File contents.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileSet": {
+              "@id": "prompt-files"
+            },
+            "extract": {
+              "fileProperty": "content"
+            }
+          }
+        }
+      ]
     }
   ],
   "conformsTo": [
@@ -207,7 +367,7 @@
   "rai:dataCollectionTimeframe": "April 2026 - July 2026",
   "rai:dataImputationProtocol": "Not applicable - no imputation. Missing testbench / reference for any task -> task excluded.",
   "rai:dataPreprocessingProtocol": "Source LLM outputs were only filtered for category match; no code rewriting beyond standardising file extensions and stripping comments that referenced the source LLM.",
-  "rai:dataManipulationProtocol": "Each broken_start is the unmodified LLM iter-1 output. Reference implementations are unmodified upstream code (CUTLASS, FlashAttention, cuFFT samples, ThunderKittens, KernelBench) or author-written for the curated CUDA programming pool.",
+  "rai:dataManipulationProtocol": "Each broken_start is an unmodified LLM output (182 from frontier models; 12 from gemma-4-31b-it on ComputeEval 2026-1; 5 from qwen3.6-27b on CUDABench; per-instance provenance in instance.json). Reference implementations are unmodified upstream code (CUTLASS, FlashAttention, cuFFT samples, KernelBench) or author-written for the curated CUDA programming pool.",
   "rai:dataAnnotationProtocol": "Each instance is annotated with: task_family, error_category (5 curation-time buckets, collapsed from an 8-category per-iteration classifier), and difficulty (coarse easy / medium / hard label from the task metadata). Annotation by deterministic classifier - no human labeling step.",
   "rai:dataAnnotationPlatform": "Custom Python classifier (harness/classifier.py in companion code repo)",
   "rai:dataAnnotationAnalysis": "Inter-annotator agreement not applicable: the classifier is a deterministic rule-based system built on nvcc exit codes, error-pattern regex, and PyTorch reference comparison. Categorization is reproducible exactly given the harness output. Rules were developed iteratively against a 50-instance development set spanning all 5 error categories.",
@@ -216,10 +376,78 @@
   "rai:machineAnnotationTools": "Custom Python classifier; nvcc / KernelBench eval_kernel_against_ref for build+test-based category assignment",
   "rai:dataBiases": "(a) Source LLM bias: broken_starts inherit failure-mode distributions of source models, biased toward common LLM mistakes. (b) Domain bias: 11 task families, weighted toward CUDA C++ + KernelBench Python; under-represents OpenCL, ROCm, Triton. (c) Difficulty skew: harder tiers (L4-L5) cluster in compile_error / memory_crash; easier tiers (L1) dominate logic_error.",
   "rai:dataUseCases": "Evaluating LLM debugging capability on GPU kernels. Comparing test-time strategies. Studying feedback-richness, history-depth, few-shot exemplar effects.",
-  "rai:dataLimitations": "Single-iteration debugging only - does not measure long-horizon (>5 round) repair. Main evaluation on an NVIDIA RTX PRO 6000 Blackwell GPU, with a replication on an NVIDIA H200 (Hopper). Not a measure of from-scratch kernel generation. Performance numbers are hardware-specific. License note: dataset curation is released under CC-BY 4.0; upstream-derived instances retain their original licenses (CUTLASS, FlashAttention v2: BSD-3-Clause; KernelBench, ThunderKittens: MIT). Per-instance license metadata is in instance.json.",
+  "rai:dataLimitations": "Single-iteration debugging only - does not measure long-horizon (>5 round) repair. Main evaluation on an NVIDIA RTX PRO 6000 Blackwell GPU, with a replication on an NVIDIA H200 (Hopper). Not a measure of from-scratch kernel generation. Performance numbers are hardware-specific. License note: dataset curation is released under CC-BY 4.0; upstream-derived instances retain their original licenses (CUTLASS, FlashAttention v2: BSD-3-Clause; KernelBench: MIT). Per-instance license metadata is in instance.json.",
   "rai:dataSocialImpact": "Low risk. Benchmark contains only public-domain CUDA programming patterns. No personal data. Dual-use: improved LLM debugging could accelerate GPU code generation.",
   "rai:personalSensitiveInformation": "None. Dataset contains only kernel source code with no PII, no user-identifying content, no copyrighted text outside CC-licensed upstreams.",
   "rai:dataReleaseMaintenancePlan": "Versioned releases in the public GitHub repository https://github.com/UMN-APEX-Lab/CUDABeaver. Future versions on bug fixes or task-pool expansion. Maintained by the authors.",
   "rai:hasSyntheticData": true,
+  "prov:wasDerivedFrom": [
+    {
+      "@type": "sc:Dataset",
+      "name": "KernelBench",
+      "url": "https://github.com/ScalingIntelligence/KernelBench"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "ComputeEval",
+      "url": "https://github.com/NVIDIA/compute-eval"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "CUDABench",
+      "url": "https://github.com/CUDA-Bench/CUDABench"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "CUTLASS",
+      "url": "https://github.com/NVIDIA/cutlass"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "FlashAttention",
+      "url": "https://github.com/Dao-AILab/flash-attention"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "NVIDIA Apex",
+      "url": "https://github.com/NVIDIA/apex"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "NVIDIA CUDALibrarySamples",
+      "url": "https://github.com/NVIDIA/CUDALibrarySamples"
+    },
+    {
+      "@type": "sc:Dataset",
+      "name": "NVIDIA cuda-samples",
+      "url": "https://github.com/NVIDIA/cuda-samples"
+    }
+  ],
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q4929239"
+      },
+      "prov:label": "Data collection",
+      "sc:description": "Frontier and open-weight LLMs (incl. gemma-4-31b-it, qwen3.6-27b) were prompted to write CUDA kernels for tasks from the source benchmarks; failing first-iteration outputs became candidate broken starts."
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q1172378"
+      },
+      "prov:label": "Data filtering",
+      "sc:description": "Candidates were kept only if they reproducibly fail with the target category under the native build/test harness while the reference passes; instances whose broken start already passes were removed (see docs/CURATION.md)."
+    },
+    {
+      "@type": "prov:Activity",
+      "prov:type": {
+        "@id": "https://www.wikidata.org/wiki/Q109719325"
+      },
+      "prov:label": "Data annotation",
+      "sc:description": "error_category is assigned by the deterministic rule-based classifier in harness/classifier.py; no human annotators."
+    }
+  ],
   "citeAs": "@inproceedings{li2026cudabeaver, title={{CUDABeaver}: Benchmarking {LLM}-Based Automated {CUDA} Debugging}, author={Li, Shiyang and Chen, Haoyang and Fazzini, Mattia and Ding, Caiwen}, booktitle={Advances in Neural Information Processing Systems (NeurIPS), Evaluations and Datasets Track}, year={2026}}"
 }

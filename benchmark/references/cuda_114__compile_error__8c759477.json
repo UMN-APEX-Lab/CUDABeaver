@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_114__compile_error__8c759477",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"bilinear_interpolation.h\"\n\n__global__ void k_bilinearInterpolation(float *inputMat, int inputWidth, int inputHeight, float *outputMat, int outputWidth, int outputHeight) {\n    // Loading clock and thread Ids\n    int local_tidX = threadIdx.x;\n    int local_tidY = threadIdx.y;\n    int thX = (blockIdx.x * blockDim.x) + local_tidX;\n    int thY = (blockIdx.y * blockDim.y) + local_tidY;\n\n    // Computing the width and height ratios\n    float xRatio = (inputWidth - 1) / (float)(outputWidth - 1);\n    float yRatio = (inputHeight - 1) / (float)(outputHeight - 1);\n\n    int xOffset = (int)(blockIdx.x * blockDim.x * xRatio);\n    int yOffset = (int)(blockIdx.y * blockDim.y * yRatio);\n\n    if ((thX >= outputWidth) || (thY >= outputHeight)) {\n        return;\n    }\n\n    // Using shared memory to store input as multiple threads re-use the same input location\n    extern __shared__ float sharedMem[];\n    int xLim = ceilf(BLOCK_SIZE * xRatio) + 2;\n    int yLim = ceilf(BLOCK_SIZE * yRatio) + 2;\n\n    if ((local_tidX < xLim) && (local_tidY < yLim)) {\n        int gx = min(xOffset + local_tidX, inputWidth - 1);\n        int gy = min(yOffset + local_tidY, inputHeight - 1);\n        sharedMem[local_tidY * xLim + local_tidX] = inputMat[gy * inputWidth + gx];\n    }\n\n    __syncthreads();\n\n    // Computing bilinear interpolation\n    float dx = (thX * xRatio);\n    float dy = (thY * yRatio);\n    int dy_l = (int)dy - yOffset; int dy_h = ceilf(dy) - yOffset;\n    int dx_l = (int)dx - xOffset; int dx_h = ceilf(dx) - xOffset;\n\n    float dxDiff = (dx - floorf(dx));\n    float dyDiff = (dy - floorf(dy));\n\n    float tmpX1 = ((1 - dxDiff) * sharedMem[dy_l * xLim + dx_l]) + (dxDiff * sharedMem[dy_l * xLim + dx_h]);\n    float tmpX2 = ((1 - dxDiff) * sharedMem[dy_h * xLim + dx_l]) + (dxDiff * sharedMem[dy_h * xLim + dx_h]);\n    float outVal = (1 - dyDiff) * tmpX1 + dyDiff * tmpX2;\n\n    // Clip the outputs to the interval [0.0,1.0]\n    outVal = (outVal > 1.0) ? 1.0 : (outVal < 0.0) ? 0.0 : outVal;\n    outputMat[thY * outputWidth + thX] = outVal;\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_114__compile_error__8c759477",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"bilinear_interpolation.h\"\n\n__global__ void k_bilinearInterpolation(float *inputMat, int inputWidth, int inputHeight, float *outputMat, int outputWidth, int outputHeight) {\n    // Loading clock and thread Ids\n    int local_tidX = threadIdx.x;\n    int local_tidY = threadIdx.y;\n    int thX = (blockIdx.x * blockDim.x) + local_tidX;\n    int thY = (blockIdx.y * blockDim.y) + local_tidY;\n\n    // Computing the width and height ratios\n    float xRatio = (inputWidth - 1) / (float)(outputWidth - 1);\n    float yRatio = (inputHeight - 1) / (float)(outputHeight - 1);\n\n    int xOffset = (int)(blockIdx.x * blockDim.x * xRatio);\n    int yOffset = (int)(blockIdx.y * blockDim.y * yRatio);\n\n    if ((thX >= outputWidth) || (thY >= outputHeight)) {\n        return;\n    }\n\n    // Using shared memory to store input as multiple threads re-use the same input location\n    extern __shared__ float sharedMem[];\n    int xLim = ceilf(BLOCK_SIZE * xRatio) + 2;\n    int yLim = ceilf(BLOCK_SIZE * yRatio) + 2;\n\n    if ((local_tidX < xLim) && (local_tidY < yLim)) {\n        int gx = min(xOffset + local_tidX, inputWidth - 1);\n        int gy = min(yOffset + local_tidY, inputHeight - 1);\n        sharedMem[local_tidY * xLim + local_tidX] = inputMat[gy * inputWidth + gx];\n    }\n\n    __syncthreads();\n\n    // Computing bilinear interpolation\n    float dx = (thX * xRatio);\n    float dy = (thY * yRatio);\n    int dy_l = (int)dy - yOffset; int dy_h = ceilf(dy) - yOffset;\n    int dx_l = (int)dx - xOffset; int dx_h = ceilf(dx) - xOffset;\n\n    float dxDiff = (dx - floorf(dx));\n    float dyDiff = (dy - floorf(dy));\n\n    float tmpX1 = ((1 - dxDiff) * sharedMem[dy_l * xLim + dx_l]) + (dxDiff * sharedMem[dy_l * xLim + dx_h]);\n    float tmpX2 = ((1 - dxDiff) * sharedMem[dy_h * xLim + dx_l]) + (dxDiff * sharedMem[dy_h * xLim + dx_h]);\n    float outVal = (1 - dyDiff) * tmpX1 + dyDiff * tmpX2;\n\n    // Clip the outputs to the interval [0.0,1.0]\n    outVal = (outVal > 1.0) ? 1.0 : (outVal < 0.0) ? 0.0 : outVal;\n    outputMat[thY * outputWidth + thX] = outVal;\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

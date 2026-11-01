@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_157__compile_error__9c8e4d18",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"cdf_calculator.h\"\n#include \"cuda_utils.h\"\n#include <thrust/sort.h>\n#include <thrust/reduce.h>\n#include <thrust/scan.h>\n#include <thrust/scatter.h>\n#include <thrust/transform.h>\n#include <thrust/execution_policy.h>\n\nvoid calculatePixelCdf(thrust::device_vector<int> &srcImage_d, int size, cudaStream_t stream, thrust::device_vector<float> &output) {\n    // Creating local device vectors\n    thrust::device_vector<int> keys_d(size);\n    thrust::device_vector<int> counts_d(size);\n    thrust::device_vector<float> result_d(size);\n    thrust::device_vector<int> sortedImage_d(size);\n    // constant device vector of 1s for counting\n    thrust::device_vector<int> constantOnes_d(size, 1);\n\n    // Copy data into another device array\n    CUDA_CHECK(cudaMemcpyAsync( thrust::raw_pointer_cast(sortedImage_d.data()),\n                                thrust::raw_pointer_cast(srcImage_d.data()),\n                                size * sizeof(int), cudaMemcpyDeviceToDevice, stream));\n\n    // Sort the data\n    thrust::sort(thrust::cuda::par.on(stream), sortedImage_d.begin(), sortedImage_d.end());\n\n    // Count occurrences on histogram using reduce_by_key\n    auto key_count_end = thrust::reduce_by_key(thrust::cuda::par.on(stream), sortedImage_d.begin(),\n                                     sortedImage_d.end(), constantOnes_d.begin(),\n                                     keys_d.begin(), counts_d.begin());\n\n    int numUniqueKeys = key_count_end.first - keys_d.begin();\n    keys_d.resize(numUniqueKeys);\n    counts_d.resize(numUniqueKeys);\n\n    // Normalize histogram to get frequencies\n    thrust::device_vector<float> freq_d(numUniqueKeys);\n    float normFactor = 1.0f / size;\n    thrust::transform(\n        thrust::cuda::par.on(stream),\n        counts_d.begin(), counts_d.end(),\n        freq_d.begin(),\n        [=] __device__ (int count) {\n            return count * normFactor;\n        });\n\n    // Compute cumulative sum of frequencies\n    thrust::inclusive_scan(thrust::cuda::par.on(stream), freq_d.begin(), freq_d.end(), freq_d.begin());\n\n    // Creating LUT with 256 entries\n    thrust::device_vector<float> lut_d(256, 0.0f);\n    thrust::scatter(\n        thrust::cuda::par.on(stream),\n        freq_d.begin(), freq_d.end(), //freq_d.begin() + numUniqueKeys,\n        keys_d.begin(),\n        lut_d.begin()\n    );\n\n    // Map each pixel to its CDF using LUT\n    float* lut_ptr = thrust::raw_pointer_cast(lut_d.data());\n    thrust::transform(\n        thrust::cuda::par.on(stream),\n        srcImage_d.begin(), srcImage_d.end(),\n        output.begin(),\n        [=] __device__ (int pixel) {\n            return lut_ptr[pixel];\n        });\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_157__compile_error__9c8e4d18",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"cdf_calculator.h\"\n#include \"cuda_utils.h\"\n#include <thrust/sort.h>\n#include <thrust/reduce.h>\n#include <thrust/scan.h>\n#include <thrust/scatter.h>\n#include <thrust/transform.h>\n#include <thrust/execution_policy.h>\n\nvoid calculatePixelCdf(thrust::device_vector<int> &srcImage_d, int size, cudaStream_t stream, thrust::device_vector<float> &output) {\n    // Creating local device vectors\n    thrust::device_vector<int> keys_d(size);\n    thrust::device_vector<int> counts_d(size);\n    thrust::device_vector<float> result_d(size);\n    thrust::device_vector<int> sortedImage_d(size);\n    // constant device vector of 1s for counting\n    thrust::device_vector<int> constantOnes_d(size, 1);\n\n    // Copy data into another device array\n    CUDA_CHECK(cudaMemcpyAsync( thrust::raw_pointer_cast(sortedImage_d.data()),\n                                thrust::raw_pointer_cast(srcImage_d.data()),\n                                size * sizeof(int), cudaMemcpyDeviceToDevice, stream));\n\n    // Sort the data\n    thrust::sort(thrust::cuda::par.on(stream), sortedImage_d.begin(), sortedImage_d.end());\n\n    // Count occurrences on histogram using reduce_by_key\n    auto key_count_end = thrust::reduce_by_key(thrust::cuda::par.on(stream), sortedImage_d.begin(),\n                                     sortedImage_d.end(), constantOnes_d.begin(),\n                                     keys_d.begin(), counts_d.begin());\n\n    int numUniqueKeys = key_count_end.first - keys_d.begin();\n    keys_d.resize(numUniqueKeys);\n    counts_d.resize(numUniqueKeys);\n\n    // Normalize histogram to get frequencies\n    thrust::device_vector<float> freq_d(numUniqueKeys);\n    float normFactor = 1.0f / size;\n    thrust::transform(\n        thrust::cuda::par.on(stream),\n        counts_d.begin(), counts_d.end(),\n        freq_d.begin(),\n        [=] __device__ (int count) {\n            return count * normFactor;\n        });\n\n    // Compute cumulative sum of frequencies\n    thrust::inclusive_scan(thrust::cuda::par.on(stream), freq_d.begin(), freq_d.end(), freq_d.begin());\n\n    // Creating LUT with 256 entries\n    thrust::device_vector<float> lut_d(256, 0.0f);\n    thrust::scatter(\n        thrust::cuda::par.on(stream),\n        freq_d.begin(), freq_d.end(), //freq_d.begin() + numUniqueKeys,\n        keys_d.begin(),\n        lut_d.begin()\n    );\n\n    // Map each pixel to its CDF using LUT\n    float* lut_ptr = thrust::raw_pointer_cast(lut_d.data());\n    thrust::transform(\n        thrust::cuda::par.on(stream),\n        srcImage_d.begin(), srcImage_d.end(),\n        output.begin(),\n        [=] __device__ (int pixel) {\n            return lut_ptr[pixel];\n        });\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

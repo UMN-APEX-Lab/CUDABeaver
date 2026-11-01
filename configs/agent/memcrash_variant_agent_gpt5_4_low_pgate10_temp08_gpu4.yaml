@@ -1,0 +1,103 @@
+api:
+  backend: openai
+  model: gpt-5.4
+  base_url: null
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.8
+  max_completion_tokens: 32768
+  reasoning_effort: low
+  finalization:
+    enabled: true
+    max_tokens: 8192
+    reasoning_char_threshold: 120000
+    reasoning_excerpt_chars: 8000
+    fallback_reasoning_as_content: false
+  json_action_finalization:
+    enabled: true
+    max_tokens: 8192
+    reasoning_char_threshold: 120000
+    reasoning_excerpt_chars: 8000
+    fallback_reasoning_as_content: false
+
+performance_gate:
+  enabled: true
+  min_speedup: 1.0
+  fail_on_skipped: true
+
+experiment:
+  name: memcrash_variant_agent_gpt5_4_low_pgate10_temp08_gpu4
+  method: agent
+  max_iterations: 5
+  dataset_dir: data
+  output_dir: results_memcrash_variant_agent_gpt5_4_low_pgate10_temp08_gpu4
+  tasks: []
+  error_category: memory_crash
+
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/cuda_debugger_workspace_agent_memcrash_gpt5_4_low_pgate10_temp08_gpu4
+
+agent:
+  workflow: blackboard
+  tools: null
+  action_protocol: json
+  json_action_response_format: true
+  full_file_submissions: true
+  tool_decision_max_tokens: 32768
+  max_patch_submissions: 5
+  max_tool_calls_per_task: 200
+  hard_stop_stagnation: false
+  performance_gate:
+    enabled: true
+    min_speedup: 1.0
+    fail_on_skipped: true
+  quotas:
+    read_code: 20
+    read_test_file: 10
+    read_prompt: 2
+    run_static_analysis: 10
+    run_compute_sanitizer: 12
+    build_only: 10
+    test_only: 10
+  blackboard:
+    coder_force_locate_first: true
+    max_role_turns: 3
+    max_coder_turns: 8
+    max_coder_non_submission_rounds: 3
+    analyzer_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - run_static_analysis
+    - locate_bug
+    executor_tools:
+    - read_code
+    - read_test_file
+    - build_only
+    - test_only
+    - run_compute_sanitizer
+    - locate_bug
+    coder_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - locate_bug
+    - apply_edit
+    - write_solution
+    - build_only
+  token_budget: 200000
+  budget_warn_ratio: 0.8
+  budget_force_ratio: 0.95
+  keep_recent_tool_exchanges: 6
+  compact_old_iterations: true
+  tool_result_cap_chars: 8000
+  use_llm_summary: false
+  summary_target_chars: 4000
+  summary_max_tokens: 32768
+  max_summary_calls: 40
+  tool_choice: required
+
+logging:
+  level: INFO
+  save_api_responses: true

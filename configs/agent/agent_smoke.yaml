@@ -1,0 +1,110 @@
+# Smoke-test config for the new method=agent loop.
+# Targets the local vLLM endpoint on :8001 (gemma-4-31B-it, thinking on —
+# thinking is parsed out server-side, so `content` comes back clean).
+# GPU 1 for builds. Run with:
+#   cd ~/CUDABeaver
+#   CUDA_VISIBLE_DEVICES=1 OPENAI_API_KEY=EMPTY \
+#     python -m harness.run_experiment -c configs/agent/agent_smoke.yaml \
+#       --tasks CUDA_10
+
+api:
+  backend: "vllm"
+  model: "google/gemma-4-31B-it"
+  base_url: "http://localhost:8001/v1"
+  temperature: 0
+  max_model_len: 262144
+  service_limit_reserve_tokens: 8192
+  service_limit_chars_per_token: 2.0
+  max_tokens: service_limit  # thinking is enabled server-side; use remaining context
+  # Tool calling requires the chat template to support `tools=` —
+  # gemma-4-31B-it via vLLM does. If switching to a model without
+  # tool-calling support, point this at one that has it.
+
+experiment:
+  name: "agent_smoke"
+  method: "agent"
+  max_iterations: 10
+  dataset_dir: "."
+  output_dir: "results_agent_smoke"
+  tasks: null   # use --tasks CUDA_10 on the CLI
+
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: "/tmp/cuda_debugger_workspace_agent"
+
+agent:
+  workflow: "blackboard"       # analyzer -> executor -> verifier -> coder
+  # Tool allow-list. null = all tools. Useful for ablation runs.
+  tools: null
+  action_protocol: json
+  tool_decision_max_tokens: service_limit
+  max_patch_submissions: 10
+  max_tool_calls_per_task: 30
+  performance_gate:
+    enabled: true
+    min_speedup: 0.7
+    fail_on_skipped: false
+  # Per-tool quotas — sanitizer is slow, reads are cheap.
+  quotas:
+    read_code: 20
+    read_test_file: 10
+    read_prompt: 3
+    run_static_analysis: 4
+    run_compute_sanitizer: 8
+    build_only: 4
+    test_only: 4
+  blackboard:
+    max_role_turns: 3
+    max_coder_turns: 4
+    # Role-scoped board projections: each role receives only the slice it
+    # needs (coder gets just the verified bug report + fix suggestions +
+    # latest runtime result) instead of the full board dump. Cuts redundant
+    # token cost; false = legacy behavior (full board to every role).
+    scoped_views: false
+    # Structured role reports: analyzer/executor finish with a bounded
+    # {summary, key_points, ruled_out} object instead of free-text prose
+    # (JSON-action protocol only). Smaller, machine-consumable verifier input
+    # + anti-redundancy via ruled_out. false = legacy free-text report.
+    structured_reports: false
+    analyzer_tools:
+      - read_code
+      - read_test_file
+      - read_prompt
+      - run_static_analysis
+      - locate_bug
+    executor_tools:
+      - read_code
+      - read_test_file
+      - build_only
+      - test_only
+      - run_compute_sanitizer
+      - locate_bug
+    coder_tools:
+      - read_code
+      - read_test_file
+      - read_prompt
+      - locate_bug
+      - apply_edit
+      - write_solution
+      - build_only
+  # Context management
+  token_budget: 100000          # gemma-4 has 262K window; budget ~40% leaves headroom
+  budget_warn_ratio: 0.80
+  budget_force_ratio: 0.95
+  keep_recent_tool_exchanges: 6
+  compact_old_iterations: true
+  # L1 trigger: tool results larger than this are LLM-summarised (not
+  # truncated). Results under this pass through verbatim. 8000 ≈ a
+  # ~250-line source file.
+  tool_result_cap_chars: 8000
+  # LLM-backed context summarisation (L1/L2/L3). Set false to fall back
+  # to head+tail truncation + one-line digests.
+  use_llm_summary: true
+  summary_target_chars: 4000      # prompt-requested summary length
+  summary_max_tokens: 4096        # hard output cap on the summariser call
+  max_summary_calls: 40
+
+logging:
+  level: "INFO"
+  save_api_responses: true

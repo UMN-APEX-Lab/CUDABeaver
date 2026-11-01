@@ -1,0 +1,19 @@
+{
+  "task_id": "cudabench_274__memory_crash__a08642f9",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include <cuda_runtime.h>\n#include <fstream>\n#include <iostream>\n#include <string>\n\nstatic void read_binary(const std::string& filename, float* data, size_t size) {\n    std::ifstream in(filename, std::ios::binary);\n    if (!in) {\n        std::cerr << \"Can not open: \" << filename << std::endl;\n        std::exit(1);\n    }\n    in.read(reinterpret_cast<char*>(data), size * sizeof(float));\n}\n\nstatic void write_binary(const std::string& filename, const float* data, size_t size) {\n    std::ofstream out(filename, std::ios::binary);\n    if (!out) {\n        std::cerr << \"Can not write: \" << filename << std::endl;\n        std::exit(1);\n    }\n    out.write(reinterpret_cast<const char*>(data), size * sizeof(float));\n}\n\n__global__ void conv_transpose2d_kernel(const float* A, const float* W, float* C) {\n    const int CIN = 64;\n    const int COUT = 64;\n    const int IN_H = 384;\n    const int IN_W = 384;\n    const int OUT_H = 768;\n    const int OUT_W = 768;\n    size_t idx = blockIdx.x * blockDim.x + threadIdx.x;\n    size_t total = size_t(COUT) * OUT_H * OUT_W;\n    if (idx >= total) {\n        return;\n    }\n\n    int ow = idx % OUT_W;\n    int oh = (idx / OUT_W) % OUT_H;\n    int co = idx / (OUT_H * OUT_W);\n    int kh = oh & 1;\n    int kw = ow & 1;\n    int ih = oh >> 1;\n    int iw = ow >> 1;\n\n    float sum = 0.0f;\n    for (int ci = 0; ci < CIN; ++ci) {\n        float x = A[(ci * IN_H + ih) * IN_W + iw];\n        float w = W[((ci * COUT + co) * 2 + kh) * 2 + kw];\n        sum += x * w;\n    }\n    C[idx] = sum;\n}\n\nint main() {\n    const int M = 147456;\n    const int K = 64;\n    const int N = 256;\n    const size_t size_A = size_t(M) * K;\n    const size_t size_B = size_t(K) * N;\n    const size_t size_C = size_t(M) * N;\n\n    float* h_A = new float[size_A];\n    float* h_B = new float[size_B];\n    float* h_C = new float[size_C];\n    read_binary(\"data/matA.bin\", h_A, size_A);\n    read_binary(\"data/matB.bin\", h_B, size_B);\n\n    float *d_A = nullptr, *d_B = nullptr, *d_C = nullptr;\n    cudaMalloc(&d_A, size_A * sizeof(float));\n    cudaMalloc(&d_B, size_B * sizeof(float));\n    cudaMalloc(&d_C, size_C * sizeof(float));\n    cudaMemcpy(d_A, h_A, size_A * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_B, h_B, size_B * sizeof(float), cudaMemcpyHostToDevice);\n\n    int threads = 256;\n    int blocks = (size_C + threads - 1) / threads;\n    conv_transpose2d_kernel<<<blocks, threads>>>(d_A, d_B, d_C);\n    cudaDeviceSynchronize();\n\n    cudaMemcpy(h_C, d_C, size_C * sizeof(float), cudaMemcpyDeviceToHost);\n    write_binary(\"data/matC_out.bin\", h_C, size_C);\n\n    cudaFree(d_A);\n    cudaFree(d_B);\n    cudaFree(d_C);\n    delete[] h_A;\n    delete[] h_B;\n    delete[] h_C;\n    return 0;\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "python benchmark/generate_inputs_only.py && ./test.out",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
+}

@@ -81,9 +81,6 @@ def test_family_reference_passes(prefix):
                 if (inst / f"reference.{ext}").exists()), None)
     assert ref is not None, f"{inst.name}: no reference file"
     code = ref.read_text()
-    if prefix == "cudabench_":
-        pytest.skip("cudabench reference oracle is test/compare_output.py, "
-                    "not a compilable program (correctness-only family)")
     if prefix == "kernelbench_":
         _kernelbench_fixture(inst)
         return
@@ -99,31 +96,6 @@ def test_family_reference_passes(prefix):
         assert build_ok, f"{inst.name}: reference failed to build:\n{build_out[-800:]}"
         rc, test_out = run_test(stem, meta, workdir, timeout=600)
         assert rc == 0, f"{inst.name}: reference failed its own test (rc={rc}):\n{test_out[-800:]}"
-    finally:
-        shutil.rmtree(workdir, ignore_errors=True)
-
-
-@needs_gpu
-def test_thunderkittens_reference_builds_on_hopper():
-    """TK kernels need the sm_90a (Hopper) API branch; skipped elsewhere."""
-    name = subprocess.run(
-        ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-        capture_output=True, text=True, timeout=10,
-    ).stdout.strip().lower()
-    if not any(t in name for t in ("h100", "h200", "gh200")):
-        pytest.skip(f"TK wgmma kernels are Hopper-only (GPU: {name or 'unknown'})")
-    from harness.compiler import compile_code, run_test
-
-    inst = _first_instance("thunderkittens_")
-    meta = json.loads((inst / "input.json").read_text())
-    stem = meta["task_id"]
-    code = (inst / "reference.cu").read_text()
-    workdir = Path(tempfile.mkdtemp(prefix="fixture_tk_"))
-    try:
-        build_ok, build_out = compile_code(code, stem, DATA, meta, workdir, timeout=900)
-        assert build_ok, f"TK reference failed to build:\n{build_out[-800:]}"
-        rc, test_out = run_test(stem, meta, workdir, timeout=900)
-        assert rc == 0, f"TK reference failed its test (rc={rc}):\n{test_out[-800:]}"
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 

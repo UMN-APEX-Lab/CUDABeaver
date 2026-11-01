@@ -1,15 +1,14 @@
 {
- "task_id": "kernelbench_level2_34__compile_error__1331a85f",
- "reference_solution": {
-  "type": "kernelbench_problem",
-  "problem_path": "kernelbench/KernelBench/level2/34_ConvTranspose3d_LayerNorm_GELU_Scaling.py",
-  "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a 3D transposed convolution, layer normalization, GELU activation, and scaling.\n    \"\"\"\n    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, bias=True, eps=1e-5, scaling_factor=1.0):\n        super(Model, self).__init__()\n        self.conv_transpose = nn.ConvTranspose3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias)\n        self.layer_norm = nn.LayerNorm(out_channels, eps=eps)\n        self.scaling_factor = scaling_factor\n\n    def forward(self, x):\n        \"\"\"\n        Args:\n            x (torch.Tensor): Input tensor of shape (batch_size, in_channels, D, H, W).\n\n        Returns:\n            torch.Tensor: Output tensor of shape (batch_size, out_channels, D', H', W').\n        \"\"\"\n        x = self.conv_transpose(x)\n        x = self.layer_norm(x)\n        x = torch.nn.functional.gelu(x)\n        x = x * self.scaling_factor\n        return x\n\nbatch_size = 32\nin_channels = 32\nout_channels = 64\nD, H, W = 16, 32, 32\nkernel_size = 4\nstride = 2\npadding = 1\nbias = True\neps = 1e-5\nscaling_factor = 1.0\n\ndef get_inputs():\n    return [torch.rand(batch_size, in_channels, D, H, W)]\n\ndef get_init_inputs():\n    return [in_channels, out_channels, kernel_size, stride, padding, bias, eps, scaling_factor]"
- },
- "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Hopper']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, num_perf_trials=10, timing_method='cuda_event', num_correct_trials=2, backend='cuda', precision=get_torch_dtype_from_string('fp32')); print(result)\"",
- "timing_mode": {
-  "type": "kernelbench_eval_result"
- },
- "n_trials": 10,
- "warmup_trials": 0,
- "requires_arch": null
+  "task_id": "kernelbench_level2_34__compile_error__1331a85f",
+  "reference_solution": {
+    "type": "kernelbench_problem",
+    "problem_path": "testbench/kernelbench_level2_34/problem.py",
+    "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a 3D transposed convolution, layer normalization, GELU activation, and scaling.\n    \"\"\"\n    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, bias=True, eps=1e-5, scaling_factor=1.0):\n        super(Model, self).__init__()\n        self.conv_transpose = nn.ConvTranspose3d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, bias=bias)\n        self.layer_norm = nn.LayerNorm(out_channels, eps=eps)\n        self.scaling_factor = scaling_factor\n\n    def forward(self, x):\n        \"\"\"\n        Args:\n            x (torch.Tensor): Input tensor of shape (batch_size, in_channels, D, H, W).\n\n        Returns:\n            torch.Tensor: Output tensor of shape (batch_size, out_channels, D', H', W').\n        \"\"\"\n        x = self.conv_transpose(x)\n        x = self.layer_norm(x)\n        x = torch.nn.functional.gelu(x)\n        x = x * self.scaling_factor\n        return x\n\nbatch_size = 32\nin_channels = 32\nout_channels = 64\nD, H, W = 16, 32, 32\nkernel_size = 4\nstride = 2\npadding = 1\nbias = True\neps = 1e-5\nscaling_factor = 1.0\n\ndef get_inputs():\n    return [torch.rand(batch_size, in_channels, D, H, W)]\n\ndef get_init_inputs():\n    return [in_channels, out_channels, kernel_size, stride, padding, bias, eps, scaling_factor]"
+  },
+  "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Blackwell']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, timing_method='cuda_event', num_correct_trials=2, num_perf_trials=100, backend='cuda', precision=get_torch_dtype_from_string('fp32'), check_for_excessive_speedup=False); print(result); raise SystemExit(0 if (result and result.compiled and result.correctness and result.runtime_stats) else 1)\"",
+  "timing_mode": {
+    "type": "kernelbench_eval_result"
+  },
+  "n_trials": 100,
+  "warmup_trials": 0
 }

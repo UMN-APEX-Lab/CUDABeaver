@@ -1,0 +1,36 @@
+{
+  "task_id": "cutlass_21_quaternion_gemm__perf_broken__a2bca46a",
+  "reference_hash": "0817d4c52da0fe9cc5ba7315fe4b06eb2a3d166881481bbaf47b2daab0cb7820",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "cutlass_ref_time_geomean",
+    "mean_ms": 19.516763461310774,
+    "min_geomean_ms": 19.381992342934314,
+    "per_case": [
+      {
+        "case": "small: M=1024, N=1024, K=1024",
+        "mean_ms": 0.7886,
+        "n_trials": 20,
+        "min_ms": 0.7848
+      },
+      {
+        "case": "medium: M=4096, N=4096, K=4096",
+        "mean_ms": 34.3618,
+        "n_trials": 20,
+        "min_ms": 34.0174
+      },
+      {
+        "case": "large: M=8192, N=8192, K=8192",
+        "mean_ms": 274.341,
+        "n_trials": 20,
+        "min_ms": 272.7314
+      }
+    ],
+    "n_cases": 3
+  },
+  "measured_at": "2026-06-26T01:27:51Z",
+  "elapsed_total_s": 14.185863971710205,
+  "skipped": null,
+  "timing_fingerprint": "67be029bb3f7ada302960f7065708e83acd277209ace05c7a86ca2378c6af65d"
+}

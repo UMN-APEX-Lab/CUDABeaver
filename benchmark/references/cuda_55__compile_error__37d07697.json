@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_55__compile_error__37d07697",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"local_prefix_sum.h\"\n#include <thrust/scan.h>\n\nthrust::device_vector<int> local_prefix_exclusive_sum(thrust::device_vector<int> const &vec,\n                                                      thrust::device_vector<int> const &keys)\n{\n    thrust::device_vector<int> result(vec.size());\n    thrust::exclusive_scan_by_key(keys.begin(), keys.end(), vec.begin(), result.begin());\n    return result;\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_55__compile_error__37d07697",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"local_prefix_sum.h\"\n#include <thrust/scan.h>\n\nthrust::device_vector<int> local_prefix_exclusive_sum(thrust::device_vector<int> const &vec,\n                                                      thrust::device_vector<int> const &keys)\n{\n    thrust::device_vector<int> result(vec.size());\n    thrust::exclusive_scan_by_key(keys.begin(), keys.end(), vec.begin(), result.begin());\n    return result;\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

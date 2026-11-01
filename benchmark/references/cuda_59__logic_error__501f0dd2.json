@@ -1,21 +1,18 @@
 {
- "task_id": "cuda_59__logic_error__501f0dd2",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"has_negatives.h\"\n#include <thrust/logical.h>\n\nstruct is_negative\n{\n    __host__ __device__ bool operator()(int x) const { return x < 0; }\n};\n\nbool has_negatives(thrust::device_vector<int> const &vec)\n{\n    return thrust::any_of(vec.begin(), vec.end(), is_negative {});\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "kernels",
-  "include": null,
-  "exclude": null
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_59__logic_error__501f0dd2",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"has_negatives.h\"\n#include <thrust/logical.h>\n\nstruct is_negative\n{\n    __host__ __device__ bool operator()(int x) const { return x < 0; }\n};\n\nbool has_negatives(thrust::device_vector<int> const &vec)\n{\n    return thrust::any_of(vec.begin(), vec.end(), is_negative {});\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

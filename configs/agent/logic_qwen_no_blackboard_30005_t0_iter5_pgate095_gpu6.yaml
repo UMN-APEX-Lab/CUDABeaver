@@ -1,0 +1,137 @@
+api:
+  backend: vllm
+  model: qwen3.6-27b
+  base_url: http://localhost:30005/v1
+  temperature: 0
+  max_model_len: 262144
+  service_limit_reserve_tokens: 8192
+  service_limit_chars_per_token: 2.0
+  max_tokens: 32768
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: true
+  seed: 0
+  retry_on_empty: 0
+performance_gate:
+  enabled: true
+  min_speedup: 0.95
+  fail_on_skipped: false
+experiment:
+  name: logic_qwen_no_blackboard_30005_t0_iter5_pgate095_gpu6
+  method: agent
+  max_iterations: 5
+  dataset_dir: data
+  output_dir: results_logic_qwen_no_blackboard_30005_t0_iter5_pgate095_gpu6
+  tasks:
+  - cuda_110__logic_error__957be815
+  - cuda_123__logic_error__12ba71c9
+  - cuda_230__logic_error__29f5516e
+  - cuda_59__logic_error__501f0dd2
+  - cutlass_20_simt_canonical__logic_error__ce1dc03e
+  - cutlass_29_ampere_3xtf32_fast_accurate_tensorop_complex_gemm__logic_error__dac79325
+  - cutlass_31_basic_syrk__logic_error__98faa9ff
+  - cutlass_32_basic_trmm__logic_error__4ae2ad48
+  - cutlass_35_gemm_softmax__logic_error__b96deb10
+  - cutlass_37_gemm_layernorm_gemm_fusion__logic_error__d2afa97d
+  - cutlass_39_gemm_permute__logic_error__e47bddec
+  - kernelbench_level1_16__logic_error__117b6454
+  - kernelbench_level1_33__logic_error__e2134f09
+  - kernelbench_level1_36__logic_error__1edf54b6
+  - kernelbench_level1_40__logic_error__927da99c
+  - kernelbench_level1_41__logic_error__b073fabd
+  - kernelbench_level1_51__logic_error__2397e474
+  - kernelbench_level1_54__logic_error__94e14c9b
+  - kernelbench_level1_56__logic_error__41e7782a
+  - kernelbench_level1_62__logic_error__da308557
+  - kernelbench_level1_64__logic_error__4bf95d15
+  - kernelbench_level1_65__logic_error__8cb59322
+  - kernelbench_level1_66__logic_error__e03d6cde
+  - kernelbench_level1_68__logic_error__b6991121
+  - kernelbench_level1_71__logic_error__7fdfb9e7
+  - kernelbench_level1_72__logic_error__aacd3949
+  - kernelbench_level1_74__logic_error__9152252a
+  - kernelbench_level1_75__logic_error__a2136a2b
+  - kernelbench_level1_78__logic_error__c1c23cc8
+  - kernelbench_level1_79__logic_error__0c7709c0
+  - kernelbench_level1_81__logic_error__ca636d37
+  - kernelbench_level1_82__logic_error__09a3f757
+  - kernelbench_level1_83__logic_error__a06d8372
+  - kernelbench_level1_84__logic_error__678aa832
+  - kernelbench_level1_89__logic_error__d4851d24
+  - kernelbench_level1_92__logic_error__ad1587f9
+  - kernelbench_level1_99__logic_error__89c6812c
+  - kernelbench_level2_12__logic_error__7a2c88a1
+  - kernelbench_level2_3__logic_error__dbf34be4
+  - kernelbench_level2_44__logic_error__ba472546
+  - kernelbench_level2_54__logic_error__28b32b3f
+  - kernelbench_level2_63__logic_error__6e3c1c0a
+  - kernelbench_level2_64__logic_error__9cb5bfaa
+  - kernelbench_level2_72__logic_error__a325074f
+  - kernelbench_level2_75__logic_error__5b9716d9
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/wd_logic_qwen_no_blackboard_30005_t0_iter5_pgate095_gpu6
+agent:
+  workflow: multi_role_no_blackboard
+  tools: null
+  action_protocol: json
+  json_action_response_format: true
+  full_file_submissions: true
+  tool_decision_max_tokens: 32768
+  max_patch_submissions: 5
+  max_tool_calls_per_task: 600
+  hard_stop_stagnation: false
+  performance_gate:
+    enabled: true
+    min_speedup: 0.95
+    fail_on_skipped: false
+  quotas:
+    read_code: 20
+    read_test_file: 10
+    read_prompt: 2
+    run_static_analysis: 10
+    run_compute_sanitizer: 12
+    build_only: 10
+    test_only: 10
+  blackboard:
+    coder_force_locate_first: true
+    max_role_turns: 2
+    max_coder_turns: 4
+    max_coder_non_submission_rounds: 3
+    analyzer_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - run_static_analysis
+    - locate_bug
+    executor_tools:
+    - read_code
+    - read_test_file
+    - build_only
+    - test_only
+    - run_compute_sanitizer
+    - locate_bug
+    coder_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - locate_bug
+    - apply_edit
+    - write_solution
+    - build_only
+    scoped_views: false
+  token_budget: 70000
+  budget_warn_ratio: 0.8
+  budget_force_ratio: 0.95
+  keep_recent_tool_exchanges: 6
+  compact_old_iterations: true
+  tool_result_cap_chars: 8000
+  use_llm_summary: false
+  summary_target_chars: 4000
+  summary_max_tokens: 32768
+  max_summary_calls: 40
+  tool_choice: required
+logging:
+  level: INFO
+  save_api_responses: true

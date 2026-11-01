@@ -34,18 +34,18 @@ class AppliedKernelsMakeSpeedup:
     def parse(self, stdout: str, stderr: str) -> dict:
         text = (stdout or "") + "\n" + (stderr or "")
         m_kernel = re.search(r"Kernel time\s*[:=]?\s*([\d.]+)\s*ms", text, re.IGNORECASE)
-        if not m_kernel:
+        m_ref = re.search(r"Ref time\s*[:=]?\s*([\d.]+)\s*ms", text, re.IGNORECASE)
+        if not m_kernel and not m_ref:
             raise ValueError(
-                f"applied_kernels_make_speedup: no 'Kernel time:' in output. "
+                f"applied_kernels_make_speedup: no 'Kernel time:' or 'Ref time:' in output. "
                 f"Last 500 chars:\n{text[-500:]}"
             )
-        kernel_ms = float(m_kernel.group(1))
+        kernel_ms = float((m_kernel or m_ref).group(1))
         result = {
             "method": "applied_kernels_make_speedup",
             "mean_ms": kernel_ms,
             "n_trials": 1,
         }
-        m_ref = re.search(r"Ref time\s*[:=]?\s*([\d.]+)\s*ms", text, re.IGNORECASE)
         if m_ref:
             result["kh_internal_ref_ms"] = float(m_ref.group(1))
         m_speedup = re.search(r"Speedup\s*[:=]?\s*([\d.]+)", text, re.IGNORECASE)

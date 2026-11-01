@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_115__compile_error__778ab761",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"odd_even_separation.h\"\n\n__global__ void k_separateOddEven(int *input_d, int *oddData_d, int *evenData_d, int numElements) {\n    __shared__ int s_input[NUM_THREADS_PER_BLOCK];\n    int localThreadId = threadIdx.x;\n    int threadId = localThreadId + blockIdx.x * blockDim.x;\n    int strideSize = blockDim.x * gridDim.x;\n    int numStrideLoopIterations = 1 + (numElements - 1) / strideSize;\n    int halfNumberOfBlockThreads = NUM_THREADS_PER_BLOCK >> 1;\n    int numElementsDiv2 = numElements >> 1;\n    int numDestinationElements = (numElements & 1) ? (numElementsDiv2 + 1) : numElementsDiv2;\n    int sourceId;\n    int destinationOffset;\n\n    // If the current warp is in the first half of block, then working on the even-index output without divergence.\n    // If the current warp is in the second half of block, then working on odd-index output without divergence.\n    if(localThreadId < halfNumberOfBlockThreads) {\n        sourceId = (localThreadId << 1);\n        destinationOffset = localThreadId;\n    } else {\n        sourceId = ((localThreadId - halfNumberOfBlockThreads) << 1) + 1;\n        destinationOffset = localThreadId - halfNumberOfBlockThreads;\n    }\n\n    for(int stride = 0; stride < numStrideLoopIterations; stride++) {\n        int itemId = threadId + stride * strideSize;\n        int itemBlockStart = itemId - (itemId % NUM_THREADS_PER_BLOCK);\n        int destinationId = (itemBlockStart >> 1) + destinationOffset;\n        \n        // Loading data in a coalesced & uniform manner.\n        if(itemId < numElements) {\n            s_input[localThreadId] = input_d[itemId];\n        }\n        \n        __syncthreads();\n        \n        // Storing data in a coalesced manner while doing interleaved access on the shared memory instead of the global memory of the input.\n        if (destinationId < numDestinationElements && sourceId < NUM_THREADS_PER_BLOCK) {\n            // All warps in the first half of the block are writing to the evenData_d while other warps are writing to the oddData_d arrays, to avoid warp-divergence.\n            if(localThreadId < halfNumberOfBlockThreads){\n                evenData_d[destinationId] = s_input[sourceId];\n            } else {\n                oddData_d[destinationId] = s_input[sourceId];\n            }\n        }\n        \n        __syncthreads();\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_115__compile_error__778ab761",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"odd_even_separation.h\"\n\n__global__ void k_separateOddEven(int *input_d, int *oddData_d, int *evenData_d, int numElements) {\n    __shared__ int s_input[NUM_THREADS_PER_BLOCK];\n    int localThreadId = threadIdx.x;\n    int threadId = localThreadId + blockIdx.x * blockDim.x;\n    int strideSize = blockDim.x * gridDim.x;\n    int numStrideLoopIterations = 1 + (numElements - 1) / strideSize;\n    int halfNumberOfBlockThreads = NUM_THREADS_PER_BLOCK >> 1;\n    int numElementsDiv2 = numElements >> 1;\n    int numDestinationElements = (numElements & 1) ? (numElementsDiv2 + 1) : numElementsDiv2;\n    int sourceId;\n    int destinationOffset;\n\n    // If the current warp is in the first half of block, then working on the even-index output without divergence.\n    // If the current warp is in the second half of block, then working on odd-index output without divergence.\n    if(localThreadId < halfNumberOfBlockThreads) {\n        sourceId = (localThreadId << 1);\n        destinationOffset = localThreadId;\n    } else {\n        sourceId = ((localThreadId - halfNumberOfBlockThreads) << 1) + 1;\n        destinationOffset = localThreadId - halfNumberOfBlockThreads;\n    }\n\n    for(int stride = 0; stride < numStrideLoopIterations; stride++) {\n        int itemId = threadId + stride * strideSize;\n        int itemBlockStart = itemId - (itemId % NUM_THREADS_PER_BLOCK);\n        int destinationId = (itemBlockStart >> 1) + destinationOffset;\n        \n        // Loading data in a coalesced & uniform manner.\n        if(itemId < numElements) {\n            s_input[localThreadId] = input_d[itemId];\n        }\n        \n        __syncthreads();\n        \n        // Storing data in a coalesced manner while doing interleaved access on the shared memory instead of the global memory of the input.\n        if (destinationId < numDestinationElements && sourceId < NUM_THREADS_PER_BLOCK) {\n            // All warps in the first half of the block are writing to the evenData_d while other warps are writing to the oddData_d arrays, to avoid warp-divergence.\n            if(localThreadId < halfNumberOfBlockThreads){\n                evenData_d[destinationId] = s_input[sourceId];\n            } else {\n                oddData_d[destinationId] = s_input[sourceId];\n            }\n        }\n        \n        __syncthreads();\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

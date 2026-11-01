@@ -1,0 +1,19 @@
+{
+  "task_id": "cudabench_284__memory_crash__63670b6d",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include <cuda_runtime.h>\n#include <fstream>\n#include <iostream>\n#include <string>\n\nstatic void read_binary(const std::string& filename, float* data, size_t size) {\n    std::ifstream in(filename, std::ios::binary);\n    if (!in) {\n        std::cerr << \"Can not open: \" << filename << std::endl;\n        std::exit(1);\n    }\n    in.read(reinterpret_cast<char*>(data), size * sizeof(float));\n}\n\nstatic void write_binary(const std::string& filename, const float* data, size_t size) {\n    std::ofstream out(filename, std::ios::binary);\n    if (!out) {\n        std::cerr << \"Can not write: \" << filename << std::endl;\n        std::exit(1);\n    }\n    out.write(reinterpret_cast<const char*>(data), size * sizeof(float));\n}\n\n__global__ void conv2d_valid_kernel(const float* input, const float* kernel, float* output) {\n    const int IN_W = 2048;\n    const int OUT_H = 2025;\n    const int OUT_W = 2025;\n    const int KH = 24;\n    const int KW = 24;\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int total = OUT_H * OUT_W;\n    if (idx >= total) {\n        return;\n    }\n    int oy = idx / OUT_W;\n    int ox = idx % OUT_W;\n    float sum = 0.0f;\n    for (int ky = 0; ky < KH; ++ky) {\n        for (int kx = 0; kx < KW; ++kx) {\n            sum += input[(oy + ky) * IN_W + ox + kx] * kernel[ky * KW + kx];\n        }\n    }\n    output[idx] = sum;\n}\n\nint main() {\n    const size_t input_size = size_t(2048) * 2048;\n    const size_t kernel_size = size_t(24) * 24;\n    const size_t output_size = size_t(2025) * 2025;\n\n    float* h_input = new float[input_size];\n    float* h_kernel = new float[kernel_size];\n    float* h_output = new float[output_size];\n    read_binary(\"data/conv_input.bin\", h_input, input_size);\n    read_binary(\"data/conv_kernel.bin\", h_kernel, kernel_size);\n\n    float *d_input = nullptr, *d_kernel = nullptr, *d_output = nullptr;\n    cudaMalloc(&d_input, input_size * sizeof(float));\n    cudaMalloc(&d_kernel, kernel_size * sizeof(float));\n    cudaMalloc(&d_output, output_size * sizeof(float));\n    cudaMemcpy(d_input, h_input, input_size * sizeof(float), cudaMemcpyHostToDevice);\n    cudaMemcpy(d_kernel, h_kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);\n\n    int threads = 256;\n    int blocks = (output_size + threads - 1) / threads;\n    conv2d_valid_kernel<<<blocks, threads>>>(d_input, d_kernel, d_output);\n    cudaDeviceSynchronize();\n\n    cudaMemcpy(h_output, d_output, output_size * sizeof(float), cudaMemcpyDeviceToHost);\n    write_binary(\"data/conv_output.bin\", h_output, output_size);\n\n    cudaFree(d_input);\n    cudaFree(d_kernel);\n    cudaFree(d_output);\n    delete[] h_input;\n    delete[] h_kernel;\n    delete[] h_output;\n    return 0;\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "python benchmark/generate_inputs_only.py && ./test.out",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
+}

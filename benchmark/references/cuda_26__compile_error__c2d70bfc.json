@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_26__compile_error__c2d70bfc",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"reduce_warp.h\"\n\n__device__ float reduce_warp(float v)\n{\n    const unsigned MASK = 0xFFFFFFFF;\n    v                   = v + __shfl_down_sync(MASK, v, 16);\n    v                   = v + __shfl_down_sync(MASK, v, 8);\n    v                   = v + __shfl_down_sync(MASK, v, 4);\n    v                   = v + __shfl_down_sync(MASK, v, 2);\n    v                   = v + __shfl_down_sync(MASK, v, 1);\n    return v;\n}\n\n__device__ float reduce_threadblock(float v, float *smem)\n{\n    // here we assume that reduce_warp is already used\n    int warpId = threadIdx.x / 32;\n    int laneId = threadIdx.x % 32;\n    if (laneId == 0)\n    {\n        smem[warpId] = v;\n    }\n    // make sure every warp has written to shared memory\n\n    // also make sure that they don't start executing before all\n    // of them reach the same execution point\n    __syncthreads();\n    // each thread block can be of maximum size of 1024 threads\n    // which means, there can be at most 32 warps in threadblock\n    // we use the first warp to do the final reduction\n    if (warpId == 0)\n    {\n        // Calculate the number of warps in the threadblock\n        int numWarps = (blockDim.x + 31) / 32;\n        // Only read valid data from smem, initialize rest to 0\n        v = (laneId < numWarps) ? smem[laneId] : 0.0f;\n        v = reduce_warp(v);\n    }\n    return v;\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_26__compile_error__c2d70bfc",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"reduce_warp.h\"\n\n__device__ float reduce_warp(float v)\n{\n    const unsigned MASK = 0xFFFFFFFF;\n    v                   = v + __shfl_down_sync(MASK, v, 16);\n    v                   = v + __shfl_down_sync(MASK, v, 8);\n    v                   = v + __shfl_down_sync(MASK, v, 4);\n    v                   = v + __shfl_down_sync(MASK, v, 2);\n    v                   = v + __shfl_down_sync(MASK, v, 1);\n    return v;\n}\n\n__device__ float reduce_threadblock(float v, float *smem)\n{\n    // here we assume that reduce_warp is already used\n    int warpId = threadIdx.x / 32;\n    int laneId = threadIdx.x % 32;\n    if (laneId == 0)\n    {\n        smem[warpId] = v;\n    }\n    // make sure every warp has written to shared memory\n\n    // also make sure that they don't start executing before all\n    // of them reach the same execution point\n    __syncthreads();\n    // each thread block can be of maximum size of 1024 threads\n    // which means, there can be at most 32 warps in threadblock\n    // we use the first warp to do the final reduction\n    if (warpId == 0)\n    {\n        // Calculate the number of warps in the threadblock\n        int numWarps = (blockDim.x + 31) / 32;\n        // Only read valid data from smem, initialize rest to 0\n        v = (laneId < numWarps) ? smem[laneId] : 0.0f;\n        v = reduce_warp(v);\n    }\n    return v;\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

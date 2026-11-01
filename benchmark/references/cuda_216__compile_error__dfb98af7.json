@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_216__compile_error__dfb98af7",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"bfs_kernel.h\"\n\n__global__ void k_bfsKernel(\n    const int* rowOffsets_d,\n    const int* colIndices_d,\n    const int* frontier_d,\n    int frontierSize,\n    int currentLevel,\n    int* distances_d,\n    int* nextFrontier_d,\n    int* nextFrontierSize_d)\n{\n    // Calculate the global thread ID\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n\n    // Use a grid-stride loop to allow each thread to process multiple nodes\n    // if the frontier is larger than the number of threads in the grid.\n    for (int i = tid; i < frontierSize; i += gridDim.x * blockDim.x) {\n        // Get the current node 'u' from the frontier to process\n        int u = frontier_d[i];\n\n        // Get the range of neighbors for node 'u' from the CSR representation\n        int start = rowOffsets_d[u];\n        int end = rowOffsets_d[u + 1];\n\n        // Iterate over the neighbors of 'u'\n        for (int j = start; j < end; ++j) {\n            int v = colIndices_d[j];\n\n            // Check if the neighbor 'v' has not been visited yet (distance is -1)\n            if (distances_d[v] == -1) {\n                // Atomically attempt to set the distance of 'v'.\n                // atomicCAS (Compare-And-Swap) checks if distances_d[v] is still -1.\n                // If it is, it sets the distance to `currentLevel + 1` and returns the old value (-1).\n                // This ensures that only the first thread to reach 'v' in this level will process it.\n                if (atomicCAS(&distances_d[v], -1, currentLevel + 1) == -1) {\n                    // Atomically get a unique index in the next frontier array.\n                    // atomicAdd increments `nextFrontierSize_d` and returns its value before the increment.\n                    int pos = atomicAdd(nextFrontierSize_d, 1);\n\n                    // Add the newly discovered node 'v' to the next frontier.\n                    nextFrontier_d[pos] = v;\n                }\n            }\n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_216__compile_error__dfb98af7",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"bfs_kernel.h\"\n\n__global__ void k_bfsKernel(\n    const int* rowOffsets_d,\n    const int* colIndices_d,\n    const int* frontier_d,\n    int frontierSize,\n    int currentLevel,\n    int* distances_d,\n    int* nextFrontier_d,\n    int* nextFrontierSize_d)\n{\n    // Calculate the global thread ID\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n\n    // Use a grid-stride loop to allow each thread to process multiple nodes\n    // if the frontier is larger than the number of threads in the grid.\n    for (int i = tid; i < frontierSize; i += gridDim.x * blockDim.x) {\n        // Get the current node 'u' from the frontier to process\n        int u = frontier_d[i];\n\n        // Get the range of neighbors for node 'u' from the CSR representation\n        int start = rowOffsets_d[u];\n        int end = rowOffsets_d[u + 1];\n\n        // Iterate over the neighbors of 'u'\n        for (int j = start; j < end; ++j) {\n            int v = colIndices_d[j];\n\n            // Check if the neighbor 'v' has not been visited yet (distance is -1)\n            if (distances_d[v] == -1) {\n                // Atomically attempt to set the distance of 'v'.\n                // atomicCAS (Compare-And-Swap) checks if distances_d[v] is still -1.\n                // If it is, it sets the distance to `currentLevel + 1` and returns the old value (-1).\n                // This ensures that only the first thread to reach 'v' in this level will process it.\n                if (atomicCAS(&distances_d[v], -1, currentLevel + 1) == -1) {\n                    // Atomically get a unique index in the next frontier array.\n                    // atomicAdd increments `nextFrontierSize_d` and returns its value before the increment.\n                    int pos = atomicAdd(nextFrontierSize_d, 1);\n\n                    // Add the newly discovered node 'v' to the next frontier.\n                    nextFrontier_d[pos] = v;\n                }\n            }\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

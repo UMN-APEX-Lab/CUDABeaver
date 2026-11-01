@@ -1,4 +1,4 @@
-# v3 mem_crash supplemental — qwen36_27b_repeated_memcrash (repeated@5)
+# v3 mem_crash supplemental — qwen36_27b_repeated_memcrash (pass@5)
 api:
   backend: vllm
   model: Qwen/Qwen3.6-27B

@@ -1,0 +1,32 @@
+api:
+  backend: openai
+  model: gpt-5.4
+  base_url: null
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.7
+  max_completion_tokens: 16384
+  reasoning_effort: low
+
+experiment:
+  name: gpt5_4_iterative_memcrash32_low
+  method: iterative
+  max_iterations: 5
+  max_history_rounds: 4
+  performance_gate:
+    enabled: true
+    min_speedup: 1.0
+    fail_on_skipped: true
+  measure_perf_on_pass: true
+  dataset_dir: data
+  output_dir: outputs/iter/gpt5_4_iterative_memcrash32_low
+  tasks: []
+
+  error_category: memory_crash
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/cuda_debugger_gpt5_4_iterative_memcrash32_low_gpu1
+
+logging:
+  level: INFO
+  save_api_responses: true

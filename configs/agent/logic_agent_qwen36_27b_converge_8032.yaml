@@ -1,0 +1,128 @@
+api:
+  backend: vllm
+  model: Qwen/Qwen3.6-27B
+  base_url: http://localhost:8032/v1
+  temperature: 0
+  max_model_len: 262144
+  service_limit_reserve_tokens: 8192
+  service_limit_chars_per_token: 2.0
+  max_tokens: service_limit
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: true
+experiment:
+  name: logic_agent_qwen36_27b_converge_8032
+  method: agent
+  max_iterations: 10
+  dataset_dir: data
+  output_dir: results_logic_agent_qwen36_27b_converge_8032
+  tasks:
+  - cuda_110
+  - cuda_123
+  - cuda_230
+  - cuda_59
+  - cutlass_20_simt_canonical
+  - cutlass_29_ampere_3xtf32_fast_accurate_tensorop_complex_gemm
+  - cutlass_31_basic_syrk
+  - cutlass_32_basic_trmm
+  - cutlass_35_gemm_softmax
+  - cutlass_37_gemm_layernorm_gemm_fusion
+  - cutlass_39_gemm_permute
+  - kernelbench_level1_16
+  - kernelbench_level1_33
+  - kernelbench_level1_36
+  - kernelbench_level1_40
+  - kernelbench_level1_41
+  - kernelbench_level1_51
+  - kernelbench_level1_54
+  - kernelbench_level1_56
+  - kernelbench_level1_62
+  - kernelbench_level1_64
+  - kernelbench_level1_65
+  - kernelbench_level1_66
+  - kernelbench_level1_68
+  - kernelbench_level1_71
+  - kernelbench_level1_72
+  - kernelbench_level1_74
+  - kernelbench_level1_75
+  - kernelbench_level1_78
+  - kernelbench_level1_79
+  - kernelbench_level1_81
+  - kernelbench_level1_82
+  - kernelbench_level1_83
+  - kernelbench_level1_84
+  - kernelbench_level1_89
+  - kernelbench_level1_99
+  - kernelbench_level2_12
+  - kernelbench_level2_44
+  - kernelbench_level2_54
+  - kernelbench_level2_63
+  - kernelbench_level2_64
+  - kernelbench_level2_72
+  - kernelbench_level2_75
+  error_category: logic_error
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/cuda_debugger_workspace_agent_qwen36_27b_converge_8032
+agent:
+  workflow: blackboard
+  tools: null
+  action_protocol: json
+  json_action_response_format: true
+  tool_decision_max_tokens: service_limit
+  max_patch_submissions: 10
+  max_tool_calls_per_task: 200
+  hard_stop_stagnation: false
+  performance_gate:
+    enabled: true
+    min_speedup: 0.7
+    fail_on_skipped: true
+  quotas:
+    read_code: 20
+    read_test_file: 10
+    read_prompt: 2
+    run_static_analysis: 10
+    run_compute_sanitizer: 12
+    build_only: 10
+    test_only: 10
+  blackboard:
+    coder_force_locate_first: true
+    max_role_turns: 3
+    max_coder_turns: 8
+    max_coder_non_submission_rounds: 3
+    analyzer_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - run_static_analysis
+    - locate_bug
+    executor_tools:
+    - read_code
+    - read_test_file
+    - build_only
+    - test_only
+    - run_compute_sanitizer
+    - locate_bug
+    coder_tools:
+    - read_code
+    - read_test_file
+    - read_prompt
+    - locate_bug
+    - apply_edit
+    - write_solution
+    - build_only
+  token_budget: 70000
+  budget_warn_ratio: 0.8
+  budget_force_ratio: 0.95
+  keep_recent_tool_exchanges: 6
+  compact_old_iterations: true
+  tool_result_cap_chars: 8000
+  use_llm_summary: false
+  summary_target_chars: 4000
+  summary_max_tokens: 32768
+  max_summary_calls: 40
+  tool_choice: required
+logging:
+  level: INFO
+  save_api_responses: true

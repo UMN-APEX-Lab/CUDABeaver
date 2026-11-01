@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_17__compile_error__02f4993c",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"reduce.h\"\n#include <float.h>\n\n__global__ void reduce(float *gdata, float *out, size_t n)\n{\n    __shared__ float sdata[BLOCK_SIZE];\n    int tid    = threadIdx.x;\n    sdata[tid] = -FLT_MAX;\n    size_t idx = threadIdx.x + blockDim.x * blockIdx.x;\n\n    while (idx < n)\n    {\n        sdata[tid] = max(gdata[idx], sdata[tid]);\n        idx += gridDim.x * blockDim.x;\n    }\n\n    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1)\n    {\n        __syncthreads();\n        if (tid < s) sdata[tid] = max(sdata[tid + s], sdata[tid]);\n    }\n    if (tid == 0) out[blockIdx.x] = sdata[0];\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_17__compile_error__02f4993c",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"reduce.h\"\n#include <float.h>\n\n__global__ void reduce(float *gdata, float *out, size_t n)\n{\n    __shared__ float sdata[BLOCK_SIZE];\n    int tid    = threadIdx.x;\n    sdata[tid] = -FLT_MAX;\n    size_t idx = threadIdx.x + blockDim.x * blockIdx.x;\n\n    while (idx < n)\n    {\n        sdata[tid] = max(gdata[idx], sdata[tid]);\n        idx += gridDim.x * blockDim.x;\n    }\n\n    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1)\n    {\n        __syncthreads();\n        if (tid < s) sdata[tid] = max(sdata[tid + s], sdata[tid]);\n    }\n    if (tid == 0) out[blockIdx.x] = sdata[0];\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

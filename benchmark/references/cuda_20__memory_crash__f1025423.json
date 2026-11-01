@@ -1,24 +1,19 @@
 {
- "task_id": "cuda_20__memory_crash__f1025423",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "// file: solution.cu\n#include \"stencil.h\"\n\n// This CUDA kernel performs a 1D stencil operation on a large 1D array.\n// The stencil operation calculates the sum of each element and its neighboring elements within a\n// specified radius. The function handles array sizes larger than the number of threads in a block\n// and utilizes shared memory for optimization.\n__global__ void stencil_1d(int *in, int *out)\n{\n    __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];\n    int gindex = threadIdx.x + blockIdx.x * blockDim.x;\n    int lindex = threadIdx.x + RADIUS;\n\n    // Read input elements into shared memory\n    temp[lindex] = in[gindex];\n    if (threadIdx.x < RADIUS)\n    {\n        temp[lindex - RADIUS] = (gindex - RADIUS >= 0) ? in[gindex - RADIUS] : 0;\n        temp[lindex + BLOCK_SIZE] =\n            (gindex + BLOCK_SIZE < gridDim.x * blockDim.x) ? in[gindex + BLOCK_SIZE] : 0;\n    }\n\n    // Synchronize (ensure all the data is available)\n    __syncthreads();\n\n    // Apply the stencil\n    int result = 0;\n    for (int offset = -RADIUS; offset <= RADIUS; offset++)\n    {\n        result += temp[lindex + offset];\n    }\n\n    // Store the result\n    out[gindex] = result;\n}\n"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_20__memory_crash__f1025423",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "// file: solution.cu\n#include \"stencil.h\"\n\n// This CUDA kernel performs a 1D stencil operation on a large 1D array.\n// The stencil operation calculates the sum of each element and its neighboring elements within a\n// specified radius. The function handles array sizes larger than the number of threads in a block\n// and utilizes shared memory for optimization.\n__global__ void stencil_1d(int *in, int *out)\n{\n    __shared__ int temp[BLOCK_SIZE + 2 * RADIUS];\n    int gindex = threadIdx.x + blockIdx.x * blockDim.x;\n    int lindex = threadIdx.x + RADIUS;\n\n    // Read input elements into shared memory\n    temp[lindex] = in[gindex];\n    if (threadIdx.x < RADIUS)\n    {\n        temp[lindex - RADIUS] = (gindex - RADIUS >= 0) ? in[gindex - RADIUS] : 0;\n        temp[lindex + BLOCK_SIZE] =\n            (gindex + BLOCK_SIZE < gridDim.x * blockDim.x) ? in[gindex + BLOCK_SIZE] : 0;\n    }\n\n    // Synchronize (ensure all the data is available)\n    __syncthreads();\n\n    // Apply the stencil\n    int result = 0;\n    for (int offset = -RADIUS; offset <= RADIUS; offset++)\n    {\n        result += temp[lindex + offset];\n    }\n\n    // Store the result\n    out[gindex] = result;\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
 }

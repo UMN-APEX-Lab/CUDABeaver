@@ -1,15 +1,14 @@
 {
- "task_id": "kernelbench_level1_26__memory_crash__a3df0ba5",
- "reference_solution": {
-  "type": "kernelbench_problem",
-  "problem_path": "kernelbench/KernelBench/level1/26_GELU_.py",
-  "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Simple model that performs a GELU activation.\n    \"\"\"\n    def __init__(self):\n        super(Model, self).__init__()\n    \n    def forward(self, x: torch.Tensor) -> torch.Tensor:\n        \"\"\"\n        Applies GELU activation to the input tensor.\n\n        Args:\n            x (torch.Tensor): Input tensor of any shape.\n\n        Returns:\n            torch.Tensor: Output tensor with GELU applied, same shape as input.\n        \"\"\"\n        return torch.nn.functional.gelu(x)\n\nbatch_size = 4096\ndim = 393216\n\ndef get_inputs():\n    x = torch.rand(batch_size, dim)\n    return [x]\n\ndef get_init_inputs():\n    return []  # No special initialization inputs needed"
- },
- "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Hopper']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, num_perf_trials=10, timing_method='cuda_event', num_correct_trials=2, backend='cuda', precision=get_torch_dtype_from_string('fp32')); print(result)\"",
- "timing_mode": {
-  "type": "kernelbench_eval_result"
- },
- "n_trials": 10,
- "warmup_trials": 0,
- "requires_arch": null
+  "task_id": "kernelbench_level1_26__memory_crash__a3df0ba5",
+  "reference_solution": {
+    "type": "kernelbench_problem",
+    "problem_path": "testbench/kernelbench_level1_26/problem.py",
+    "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Simple model that performs a GELU activation.\n    \"\"\"\n    def __init__(self):\n        super(Model, self).__init__()\n    \n    def forward(self, x: torch.Tensor) -> torch.Tensor:\n        \"\"\"\n        Applies GELU activation to the input tensor.\n\n        Args:\n            x (torch.Tensor): Input tensor of any shape.\n\n        Returns:\n            torch.Tensor: Output tensor with GELU applied, same shape as input.\n        \"\"\"\n        return torch.nn.functional.gelu(x)\n\nbatch_size = 4096\ndim = 393216\n\ndef get_inputs():\n    x = torch.rand(batch_size, dim)\n    return [x]\n\ndef get_init_inputs():\n    return []  # No special initialization inputs needed"
+  },
+  "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Blackwell']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, timing_method='cuda_event', num_correct_trials=5, num_perf_trials=100, backend='cuda', precision=get_torch_dtype_from_string('fp32'), check_for_excessive_speedup=False); print(result); raise SystemExit(0 if (result and result.compiled and result.correctness and result.runtime_stats) else 1)\"",
+  "timing_mode": {
+    "type": "kernelbench_eval_result"
+  },
+  "n_trials": 100,
+  "warmup_trials": 0
 }

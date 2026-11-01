@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_180__compile_error__76f2d111",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"graph_config.h\"\n#include \"graph_ops.h\"\n\nvoid runGraph(int k, float * dataIn_d, float * dataOut_d, int * constantParams_d, int maxActiveBlocks, cudaStream_t stream) {\n\n    // Creating a graph with two nodes.\n    cudaGraph_t graph;\n    cudaGraphExec_t executableGraph;\n    cudaGraphNode_t nodes[NUM_NODES];\n    cudaKernelNodeParams nodeParams;\n    \n    CUDA_CHECK(cudaGraphCreate(&graph, 0));\n    \n    // Topology of the graph utilized:\n    //\n    //        kernel node: k_calculate\n    //           |\n    //           V\n    //        memcpy node: device to device (dataIn_d <- dataOut_d) as an in-place feedback loop.\n    \n    // Adding nodes.\n    {\n        // Creating a node for the matrix-square kernel.\n        int requiredBlocks = (MAX_MATRIX_ELEMENTS + BLOCK_SIZE - 1) / BLOCK_SIZE;\n        int usedBlocks = maxActiveBlocks < requiredBlocks ? maxActiveBlocks : requiredBlocks;\n        // Grid: (usedBlocks, 1, 1)\n        // Block: (BLOCK_SIZE, 1, 1)\n        nodeParams = {};\n        nodeParams.func = (void*)k_calculate;\n        nodeParams.gridDim = dim3(usedBlocks, 1, 1);\n        nodeParams.blockDim = dim3(BLOCK_SIZE, 1, 1);\n        nodeParams.kernelParams = new void*[3];\n        nodeParams.kernelParams[0] = (void*)&dataIn_d;\n        nodeParams.kernelParams[1] = (void*)&dataOut_d;\n        nodeParams.kernelParams[2] = (void*)&constantParams_d;\n        nodeParams.sharedMemBytes = 0;\n        nodeParams.extra = nullptr;\n        CUDA_CHECK(cudaGraphAddKernelNode(  &nodes[NODE_KERNEL], \n                                            graph, \n                                            HAS_NO_DEPENDENCY, \n                                            ZERO_NODES_AS_DEPENDENCY, \n                                            &nodeParams));\n        // Creating memcpy node for the in-place feedback loop.\n        CUDA_CHECK(cudaGraphAddMemcpyNode1D(&nodes[NODE_MEMCPY_DEVICE_TO_DEVICE], graph, &nodes[NODE_KERNEL], ONE_NODE_AS_DEPENDENCY, dataIn_d, dataOut_d, sizeof(float) * MAX_MATRIX_ELEMENTS, cudaMemcpyDeviceToDevice));\n        // Instantiating the graph.\n        CUDA_CHECK(cudaGraphInstantiate(&executableGraph, graph));\n    }\n\n    // Executing graph to calculate matrix ^ (2 ^ k).\n    for(int i = 0; i < k; i++) {\n        CUDA_CHECK(cudaGraphLaunch(executableGraph, stream));\n    }\n    // Synchronizing before deallocating the graph.\n    CUDA_CHECK(cudaStreamSynchronize(stream));\n\n    // Deallocating the graph.\n    delete [] nodeParams.kernelParams;\n    CUDA_CHECK(cudaGraphExecDestroy(executableGraph));\n    CUDA_CHECK(cudaGraphDestroy(graph));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_180__compile_error__76f2d111",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"graph_config.h\"\n#include \"graph_ops.h\"\n\nvoid runGraph(int k, float * dataIn_d, float * dataOut_d, int * constantParams_d, int maxActiveBlocks, cudaStream_t stream) {\n\n    // Creating a graph with two nodes.\n    cudaGraph_t graph;\n    cudaGraphExec_t executableGraph;\n    cudaGraphNode_t nodes[NUM_NODES];\n    cudaKernelNodeParams nodeParams;\n    \n    CUDA_CHECK(cudaGraphCreate(&graph, 0));\n    \n    // Topology of the graph utilized:\n    //\n    //        kernel node: k_calculate\n    //           |\n    //           V\n    //        memcpy node: device to device (dataIn_d <- dataOut_d) as an in-place feedback loop.\n    \n    // Adding nodes.\n    {\n        // Creating a node for the matrix-square kernel.\n        int requiredBlocks = (MAX_MATRIX_ELEMENTS + BLOCK_SIZE - 1) / BLOCK_SIZE;\n        int usedBlocks = maxActiveBlocks < requiredBlocks ? maxActiveBlocks : requiredBlocks;\n        // Grid: (usedBlocks, 1, 1)\n        // Block: (BLOCK_SIZE, 1, 1)\n        nodeParams = {};\n        nodeParams.func = (void*)k_calculate;\n        nodeParams.gridDim = dim3(usedBlocks, 1, 1);\n        nodeParams.blockDim = dim3(BLOCK_SIZE, 1, 1);\n        nodeParams.kernelParams = new void*[3];\n        nodeParams.kernelParams[0] = (void*)&dataIn_d;\n        nodeParams.kernelParams[1] = (void*)&dataOut_d;\n        nodeParams.kernelParams[2] = (void*)&constantParams_d;\n        nodeParams.sharedMemBytes = 0;\n        nodeParams.extra = nullptr;\n        CUDA_CHECK(cudaGraphAddKernelNode(  &nodes[NODE_KERNEL], \n                                            graph, \n                                            HAS_NO_DEPENDENCY, \n                                            ZERO_NODES_AS_DEPENDENCY, \n                                            &nodeParams));\n        // Creating memcpy node for the in-place feedback loop.\n        CUDA_CHECK(cudaGraphAddMemcpyNode1D(&nodes[NODE_MEMCPY_DEVICE_TO_DEVICE], graph, &nodes[NODE_KERNEL], ONE_NODE_AS_DEPENDENCY, dataIn_d, dataOut_d, sizeof(float) * MAX_MATRIX_ELEMENTS, cudaMemcpyDeviceToDevice));\n        // Instantiating the graph.\n        CUDA_CHECK(cudaGraphInstantiate(&executableGraph, graph));\n    }\n\n    // Executing graph to calculate matrix ^ (2 ^ k).\n    for(int i = 0; i < k; i++) {\n        CUDA_CHECK(cudaGraphLaunch(executableGraph, stream));\n    }\n    // Synchronizing before deallocating the graph.\n    CUDA_CHECK(cudaStreamSynchronize(stream));\n\n    // Deallocating the graph.\n    delete [] nodeParams.kernelParams;\n    CUDA_CHECK(cudaGraphExecDestroy(executableGraph));\n    CUDA_CHECK(cudaGraphDestroy(graph));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

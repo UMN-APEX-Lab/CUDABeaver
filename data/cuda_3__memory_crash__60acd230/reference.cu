@@ -1,21 +1,23 @@
 // file: solution.cu
 #include "kernel_launch.h"
-#include <cuda.h>
 #include <cuda_runtime.h>
 
 void launch(int gridSizeX, int blockSizeX, int gridSizeY, int blockSizeY, int gridSizeZ,
             int blockSizeZ)
 {
-    int *output, *input;
-    dim3 threadsPerBlock(blockSizeX, blockSizeY, blockSizeZ);
-    dim3 numBlocks(gridSizeX, gridSizeY, gridSizeZ);
+    dim3 grid(gridSizeX, gridSizeY, gridSizeZ);
+    dim3 block(blockSizeX, blockSizeY, blockSizeZ);
+    size_t count = size_t(grid.x) * grid.y * grid.z * block.x * block.y * block.z;
 
-    // Kernel invocation with runtime cluster size
-    {
-        cudaLaunchConfig_t config = {0};
-        config.gridDim            = numBlocks;
-        config.blockDim           = threadsPerBlock;
+    int *output = nullptr;
+    int *input = nullptr;
+    cudaMalloc(&output, count * sizeof(int));
+    cudaMalloc(&input, count * sizeof(int));
+    cudaMemset(input, 0, count * sizeof(int));
 
-        cudaLaunchKernelEx(&config, kernel, output, input);
-    }
+    kernel<<<grid, block>>>(output, input);
+    cudaDeviceSynchronize();
+
+    cudaFree(output);
+    cudaFree(input);
 }

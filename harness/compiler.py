@@ -24,6 +24,7 @@ from pathlib import Path
 
 from .generate_headers import setup_include_dir
 from .subprocess_util import run_pg
+from .task_registry import copy_testbench_contents
 
 
 
@@ -143,27 +144,8 @@ def compile_code(
         shutil.rmtree(task_workdir)
     task_workdir.mkdir(parents=True)
 
-    # Copy testbench files
-    testbench_dir = dataset_dir / "testbench" / task_stem
-    test_src = testbench_dir / "test"
-    test_dst = task_workdir / "test"
-    if test_src.exists() and test_src.is_dir():
-        shutil.copytree(test_src, test_dst)
-
-    include_src = testbench_dir / "include"
-    if include_src.exists() and include_src.is_dir():
-        shutil.copytree(include_src, task_workdir / "include")
-
-    # Copy remaining items (preserve symlinks for reference_sources)
-    for item in testbench_dir.iterdir():
-        dst = task_workdir / item.name
-        if not dst.exists():
-            if item.is_symlink():
-                os.symlink(os.readlink(item), dst)
-            elif item.is_dir():
-                shutil.copytree(item, dst)
-            else:
-                shutil.copy2(item, dst)
+    # Copy testbench files from either legacy flat datasets or benchmark/task_list.json.
+    copy_testbench_contents(task_stem, dataset_dir, task_workdir)
 
     # Write solution to the appropriate file
     solution_file = input_meta.get("solution_file", "solution.cu")
@@ -251,3 +233,85 @@ def _enable_kernelbench_perf(test_cmd: str, input_meta: dict) -> str:
     if "eval_kernel_against_ref" not in test_cmd:
         return test_cmd
     return test_cmd.replace("measure_performance=False", "measure_performance=True")
+
+
+def run_sanitizers(
+    task_stem: str,
+    input_meta: dict,
+    workdir: Path,
+    sanitizer_config: dict | None = None,
+) -> dict:
+    """Run configured compute-sanitizer tools for an already-built task.
+
+    The agent framework imports this symbol even when automatic sanitizers are
+    disabled. Keep the function small and dependency-light so normal build/test
+    paths are unaffected.
+    """
+    cfg = sanitizer_config or {}
+    if not cfg.get("enabled", False):
+        return {
+            "triggered": False,
+            "results": {},
+            "hit_tools": [],
+            "real_hit_tools": [],
+            "timed_out_tools": [],
+            "unavailable_tools": [],
+            "skipped": "disabled",
+        }
+
+    from .diagnostics import run_compute_sanitizer
+
+    tools = cfg.get("tools") or cfg.get("tool") or ["memcheck"]
+    if isinstance(tools, str):
+        tools = [tools]
+
+    timeout = int(cfg.get("timeout", 180))
+    options = cfg.get("options") or {}
+    task_workdir = workdir / task_stem
+    test_cmd = _fix_python_cmd(input_meta.get("test_command", ""))
+    test_env = _python_subprocess_env()
+
+    summary = {
+        "triggered": True,
+        "results": {},
+        "hit_tools": [],
+        "real_hit_tools": [],
+        "timed_out_tools": [],
+        "unavailable_tools": [],
+    }
+
+    for tool in tools:
+        result = run_compute_sanitizer(
+            test_cmd,
+            task_workdir,
+            tool=str(tool),
+            timeout=timeout,
+            env=test_env,
+            options=options,
+        )
+        info = {
+            "ok": result.ok,
+            "summary": result.summary,
+            "error": result.error,
+            "output": result.to_prompt_block(),
+            "meta": result.meta,
+            "truncated": result.truncated,
+        }
+        rc = (result.meta or {}).get("returncode")
+        if result.error:
+            if "not found" in result.error:
+                summary["unavailable_tools"].append(str(tool))
+            if "timed out" in result.error:
+                summary["timed_out_tools"].append(str(tool))
+        if result.ok and rc not in (0, None):
+            summary["hit_tools"].append(str(tool))
+            if rc == 99:
+                summary["real_hit_tools"].append(str(tool))
+            info["primary_finding"] = {
+                "tool": str(tool),
+                "error_type": "compute_sanitizer_error",
+                "returncode": rc,
+            }
+        summary["results"][str(tool)] = info
+
+    return summary

@@ -1,0 +1,20 @@
+{
+  "task_id": "kernelbench_level1_45__memory_crash__3d4a5a19",
+  "reference_hash": "11e09f956e48f043ca4c89814a959b0e7912323696cca94f3deb20ab84139266",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "kernelbench_eval_result",
+    "mean_ms": 11.7,
+    "p50_ms": 11.7,
+    "p95_ms": 11.7,
+    "stddev_ms": 0.00441,
+    "raw_samples_ms": [],
+    "n_trials": 100,
+    "warmup_trials": 0
+  },
+  "measured_at": "2026-06-26T01:15:59Z",
+  "elapsed_total_s": 144.93609523773193,
+  "skipped": null,
+  "timing_fingerprint": "5e7e4928bfa6442d421ef86661f7928760c7bc40a5302d9d6c77fd93190ceec7"
+}

@@ -1,0 +1,35 @@
+api:
+  backend: vllm
+  model: qwen3.6-27b
+  base_url: http://localhost:30005/v1
+  temperature: 0
+  top_p: 1.0
+  max_tokens: 32768
+  timeout: 300
+  extra_body:
+    chat_template_kwargs:
+      enable_thinking: false
+
+experiment:
+  name: qwen36_27b_memcrash32_30005_iterative
+  method: iterative
+  max_iterations: 5
+  max_history_rounds: 4
+  performance_gate:
+    enabled: true
+    min_speedup: 1.0
+    fail_on_skipped: true
+  measure_perf_on_pass: true
+  dataset_dir: data
+  output_dir: outputs/iter/qwen36_27b_memcrash32_30005_iterative
+  tasks: []
+  error_category: memory_crash
+
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/cuda_debugger_qwen36_memcrash32_30005_iterative_gpu7
+
+logging:
+  level: INFO
+  save_api_responses: true

@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_185__compile_error__66e20d69",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"log2_kernel.h\"\n\n__global__ void k_calculateLog2(int numElements, float * data_d, float * lookupTable_d, int lookupTableDuplication) {\n    constexpr int NUM_MANTISSA_BITS = 23;\n    constexpr int EXPONENT_BIAS = 127;\n    constexpr int EXPONENT_MASK = 0b11111111;\n    constexpr int MANTISSA_MASK = 0b11111111111111111111111;\n    extern __shared__ char s_mem[];\n    float * s_lookup = reinterpret_cast<float*>(s_mem);\n    // Initializing the duplicate lookup table elements without bank conflicts..\n    for(int workIndex = threadIdx.x; workIndex < LOOKUP_TABLE_ELEMENTS; workIndex += blockDim.x) {\n        float lookupValue = lookupTable_d[workIndex];\n        for(int i = 0; i < lookupTableDuplication; i++) {\n            s_lookup[workIndex * lookupTableDuplication + ((workIndex + i) % lookupTableDuplication)] = lookupValue;\n        }\n    }\n    __syncthreads();\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    int numGlobalThreads = blockDim.x * gridDim.x;\n    for(int workIndex = globalThreadIndex; workIndex < numElements; workIndex += numGlobalThreads) {\n        // Computing log2(x) = (exponent bits of x) + log2(mantissa bits of x), where the log2(mantissa) is fetched from the lookup table.\n        // Coalesced access to global memory.\n        float x = data_d[workIndex];\n        int bitRepresentation = __float_as_int(x);\n        int exponentBitRepresentation = (bitRepresentation >> NUM_MANTISSA_BITS) & EXPONENT_MASK;\n        int exponent = exponentBitRepresentation - EXPONENT_BIAS;\n        float mantissa = __int_as_float((EXPONENT_BIAS << NUM_MANTISSA_BITS) | (bitRepresentation & MANTISSA_MASK));\n        int lookupIndex = int((mantissa - 1.0f) * LOOKUP_TABLE_ELEMENTS);\n        // Calculating indices that are free from bank conflicts to utilize more memory banks concurrently.\n        float result = exponent + s_lookup[lookupIndex * lookupTableDuplication + (threadIdx.x % lookupTableDuplication)];\n        // Coalesced access to global memory.\n        data_d[workIndex] = result;\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_185__compile_error__66e20d69",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"log2_kernel.h\"\n\n__global__ void k_calculateLog2(int numElements, float * data_d, float * lookupTable_d, int lookupTableDuplication) {\n    constexpr int NUM_MANTISSA_BITS = 23;\n    constexpr int EXPONENT_BIAS = 127;\n    constexpr int EXPONENT_MASK = 0b11111111;\n    constexpr int MANTISSA_MASK = 0b11111111111111111111111;\n    extern __shared__ char s_mem[];\n    float * s_lookup = reinterpret_cast<float*>(s_mem);\n    // Initializing the duplicate lookup table elements without bank conflicts..\n    for(int workIndex = threadIdx.x; workIndex < LOOKUP_TABLE_ELEMENTS; workIndex += blockDim.x) {\n        float lookupValue = lookupTable_d[workIndex];\n        for(int i = 0; i < lookupTableDuplication; i++) {\n            s_lookup[workIndex * lookupTableDuplication + ((workIndex + i) % lookupTableDuplication)] = lookupValue;\n        }\n    }\n    __syncthreads();\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    int numGlobalThreads = blockDim.x * gridDim.x;\n    for(int workIndex = globalThreadIndex; workIndex < numElements; workIndex += numGlobalThreads) {\n        // Computing log2(x) = (exponent bits of x) + log2(mantissa bits of x), where the log2(mantissa) is fetched from the lookup table.\n        // Coalesced access to global memory.\n        float x = data_d[workIndex];\n        int bitRepresentation = __float_as_int(x);\n        int exponentBitRepresentation = (bitRepresentation >> NUM_MANTISSA_BITS) & EXPONENT_MASK;\n        int exponent = exponentBitRepresentation - EXPONENT_BIAS;\n        float mantissa = __int_as_float((EXPONENT_BIAS << NUM_MANTISSA_BITS) | (bitRepresentation & MANTISSA_MASK));\n        int lookupIndex = int((mantissa - 1.0f) * LOOKUP_TABLE_ELEMENTS);\n        // Calculating indices that are free from bank conflicts to utilize more memory banks concurrently.\n        float result = exponent + s_lookup[lookupIndex * lookupTableDuplication + (threadIdx.x % lookupTableDuplication)];\n        // Coalesced access to global memory.\n        data_d[workIndex] = result;\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

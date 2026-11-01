@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_230__logic_error__29f5516e",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"count_occurrences.h\"\n\n__global__ void k_countOccurrences(int * array1_d, \n                                   int * array2_d, \n                                   int len1, \n                                   int len2, \n                                   int * count_d) {\n    int localThreadIndex = threadIdx.x;\n    int numLocalThreads = blockDim.x;\n    int globalThreadIndex = localThreadIndex + blockIdx.x * numLocalThreads;\n    int numGlobalThreads = numLocalThreads * gridDim.x;\n    int numActiveBlocks = (len1 + numLocalThreads - 1) / numLocalThreads;\n    extern __shared__ int s_array2[];\n    // Grid-stride loop for integers to count.\n    int numArray1Iterations = (len1 + numGlobalThreads - 1) / numGlobalThreads;\n    for (int array1Iteration = 0; array1Iteration < numArray1Iterations; array1Iteration++) {\n        int array1Index = array1Iteration * numGlobalThreads + globalThreadIndex;\n        int array1Element = (array1Index < len1 ? array1_d[array1Index] : 0);\n        int numArray2Iterations = (len2 + numLocalThreads - 1) / numLocalThreads;\n        if(array1Index / numLocalThreads < numActiveBlocks) {\n            int count = 0;\n            for (int array2Iteration = 0; array2Iteration < numArray2Iterations; array2Iteration++) {\n                int array2Offset = array2Iteration * numLocalThreads;\n                int array2Index = array2Offset + localThreadIndex;\n                s_array2[localThreadIndex] = (array2Index < len2 ? array2_d[array2Index] : 0);\n                __syncthreads();\n                for (int i = 0; i < numLocalThreads; i++) {\n                    if (i + array2Offset < len2) {\n                        count += (array1Element == s_array2[i]);\n                    } else {\n                        break;\n                    }\n                }\n                __syncthreads();\n            }\n            if (array1Index < len1) {\n                count_d[array1Index] = count;\n            }\n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_230__logic_error__29f5516e",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"count_occurrences.h\"\n\n__global__ void k_countOccurrences(int * array1_d, \n                                   int * array2_d, \n                                   int len1, \n                                   int len2, \n                                   int * count_d) {\n    int localThreadIndex = threadIdx.x;\n    int numLocalThreads = blockDim.x;\n    int globalThreadIndex = localThreadIndex + blockIdx.x * numLocalThreads;\n    int numGlobalThreads = numLocalThreads * gridDim.x;\n    int numActiveBlocks = (len1 + numLocalThreads - 1) / numLocalThreads;\n    extern __shared__ int s_array2[];\n    // Grid-stride loop for integers to count.\n    int numArray1Iterations = (len1 + numGlobalThreads - 1) / numGlobalThreads;\n    for (int array1Iteration = 0; array1Iteration < numArray1Iterations; array1Iteration++) {\n        int array1Index = array1Iteration * numGlobalThreads + globalThreadIndex;\n        int array1Element = (array1Index < len1 ? array1_d[array1Index] : 0);\n        int numArray2Iterations = (len2 + numLocalThreads - 1) / numLocalThreads;\n        if(array1Index / numLocalThreads < numActiveBlocks) {\n            int count = 0;\n            for (int array2Iteration = 0; array2Iteration < numArray2Iterations; array2Iteration++) {\n                int array2Offset = array2Iteration * numLocalThreads;\n                int array2Index = array2Offset + localThreadIndex;\n                s_array2[localThreadIndex] = (array2Index < len2 ? array2_d[array2Index] : 0);\n                __syncthreads();\n                for (int i = 0; i < numLocalThreads; i++) {\n                    if (i + array2Offset < len2) {\n                        count += (array1Element == s_array2[i]);\n                    } else {\n                        break;\n                    }\n                }\n                __syncthreads();\n            }\n            if (array1Index < len1) {\n                count_d[array1Index] = count;\n            }\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

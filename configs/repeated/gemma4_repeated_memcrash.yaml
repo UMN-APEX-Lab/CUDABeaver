@@ -1,4 +1,4 @@
-# v3 mem_crash supplemental — gemma4_repeated_memcrash (repeated@5)
+# v3 mem_crash supplemental — gemma4_repeated_memcrash (pass@5)
 api:
   backend: vllm
   model: google/gemma-4-31B-it

@@ -1,4 +1,4 @@
-# v3 mem_crash supplemental — glm_4_7_repeated_memcrash (repeated@5)
+# v3 mem_crash supplemental — glm_4_7_repeated_memcrash (pass@5)
 api:
   backend: openai
   model: z-ai/glm4.7

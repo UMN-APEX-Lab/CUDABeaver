@@ -1,24 +1,18 @@
 {
- "task_id": "cusolver_2__compile_error__c97e7eef",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"compute_svd_batched.h\"\n\nvoid compute_svd_batched(int batchSize, int m, int n,\n                         const std::vector<float> &A, std::vector<float> &S,\n                         std::vector<float> &U, std::vector<float> &V) {\n  cusolverDnHandle_t cusolverH = NULL;\n  cudaStream_t stream = NULL;\n\n  const int lda = m;\n  const int ldu = m;\n  const int ldv = n;\n  const int rank = n;\n  const long long int strideA = static_cast<long long int>(lda * n);\n  const long long int strideS = n;\n  const long long int strideU = static_cast<long long int>(ldu * n);\n  const long long int strideV = static_cast<long long int>(ldv * n);\n\n  float *d_A = nullptr;\n  float *d_S = nullptr;\n  float *d_U = nullptr;\n  float *d_V = nullptr;\n  int *d_info = nullptr;\n\n  int lwork = 0;\n  float *d_work = nullptr;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&cusolverH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(cusolverH, stream));\n\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_A),\n                        sizeof(float) * strideA * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_S),\n                        sizeof(float) * strideS * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_U),\n                        sizeof(float) * strideU * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V),\n                        sizeof(float) * strideV * batchSize));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_info), sizeof(int) * batchSize));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(float) * strideA * batchSize,\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnSgesvdaStridedBatched_bufferSize(\n      cusolverH, CUSOLVER_EIG_MODE_VECTOR, rank, m, n, d_A, lda, strideA, d_S,\n      strideS, d_U, ldu, strideU, d_V, ldv, strideV, &lwork, batchSize));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_work), sizeof(float) * lwork));\n\n  CUSOLVER_CHECK(cusolverDnSgesvdaStridedBatched(\n      cusolverH, CUSOLVER_EIG_MODE_VECTOR, rank, m, n, d_A, lda, strideA, d_S,\n      strideS, d_U, ldu, strideU, d_V, ldv, strideV, d_work, lwork, d_info,\n      nullptr, batchSize));\n\n  CUDA_CHECK(cudaMemcpyAsync(S.data(), d_S, sizeof(float) * strideS * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(U.data(), d_U, sizeof(float) * strideU * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(V.data(), d_V, sizeof(float) * strideV * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_S));\n  CUDA_CHECK(cudaFree(d_U));\n  CUDA_CHECK(cudaFree(d_V));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n\n  CUSOLVER_CHECK(cusolverDnDestroy(cusolverH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cusolver_2__compile_error__c97e7eef",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"compute_svd_batched.h\"\n\nvoid compute_svd_batched(int batchSize, int m, int n,\n                         const std::vector<float> &A, std::vector<float> &S,\n                         std::vector<float> &U, std::vector<float> &V) {\n  cusolverDnHandle_t cusolverH = NULL;\n  cudaStream_t stream = NULL;\n\n  const int lda = m;\n  const int ldu = m;\n  const int ldv = n;\n  const int rank = n;\n  const long long int strideA = static_cast<long long int>(lda * n);\n  const long long int strideS = n;\n  const long long int strideU = static_cast<long long int>(ldu * n);\n  const long long int strideV = static_cast<long long int>(ldv * n);\n\n  float *d_A = nullptr;\n  float *d_S = nullptr;\n  float *d_U = nullptr;\n  float *d_V = nullptr;\n  int *d_info = nullptr;\n\n  int lwork = 0;\n  float *d_work = nullptr;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&cusolverH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(cusolverH, stream));\n\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_A),\n                        sizeof(float) * strideA * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_S),\n                        sizeof(float) * strideS * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_U),\n                        sizeof(float) * strideU * batchSize));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_V),\n                        sizeof(float) * strideV * batchSize));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_info), sizeof(int) * batchSize));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(float) * strideA * batchSize,\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnSgesvdaStridedBatched_bufferSize(\n      cusolverH, CUSOLVER_EIG_MODE_VECTOR, rank, m, n, d_A, lda, strideA, d_S,\n      strideS, d_U, ldu, strideU, d_V, ldv, strideV, &lwork, batchSize));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_work), sizeof(float) * lwork));\n\n  CUSOLVER_CHECK(cusolverDnSgesvdaStridedBatched(\n      cusolverH, CUSOLVER_EIG_MODE_VECTOR, rank, m, n, d_A, lda, strideA, d_S,\n      strideS, d_U, ldu, strideU, d_V, ldv, strideV, d_work, lwork, d_info,\n      nullptr, batchSize));\n\n  CUDA_CHECK(cudaMemcpyAsync(S.data(), d_S, sizeof(float) * strideS * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(U.data(), d_U, sizeof(float) * strideU * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(V.data(), d_V, sizeof(float) * strideV * batchSize,\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_S));\n  CUDA_CHECK(cudaFree(d_U));\n  CUDA_CHECK(cudaFree(d_V));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n\n  CUSOLVER_CHECK(cusolverDnDestroy(cusolverH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

@@ -1,24 +1,18 @@
 {
- "task_id": "cusolver_23__compile_error__5d0216da",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"compute_svd.h\"\n#include \"cuda_utils.h\"\n#include <stdexcept>\n\nvoid compute_svd(int64_t m, int64_t n, int64_t rank, int64_t p, int64_t iters,\n                 std::vector<double> &A, std::vector<double> &S,\n                 std::vector<double> &U, std::vector<double> &V) {\n  cusolverDnHandle_t cusolverH = NULL;\n  cusolverDnParams_t params_gesvdr = NULL;\n  cudaStream_t stream = NULL;\n\n  double *d_A = nullptr;\n  double *d_S = nullptr;\n  double *d_U = nullptr;\n  double *d_V = nullptr;\n  size_t workspaceInBytesOnDevice = 0;\n  size_t workspaceInBytesOnHost = 0;\n  void *d_work = nullptr;\n  void *h_work = nullptr;\n  int *d_info = nullptr;\n  int info = 0;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&cusolverH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(cusolverH, stream));\n  CUSOLVER_CHECK(cusolverDnCreateParams(&params_gesvdr));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_A), sizeof(double) * A.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_S), sizeof(double) * S.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_U), sizeof(double) * U.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_V), sizeof(double) * V.size()));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_info), sizeof(int)));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(double) * A.size(),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnXgesvdr_bufferSize(\n      cusolverH, params_gesvdr, 'S', 'S', m, n, rank, p, iters, CUDA_R_64F, d_A,\n      m, CUDA_R_64F, d_S, CUDA_R_64F, d_U, m, CUDA_R_64F, d_V, n, CUDA_R_64F,\n      &workspaceInBytesOnDevice, &workspaceInBytesOnHost));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_work), workspaceInBytesOnDevice));\n  if (workspaceInBytesOnHost > 0) {\n    h_work = malloc(workspaceInBytesOnHost);\n    if (h_work == nullptr) {\n      throw std::runtime_error(\"Error: h_work not allocated.\");\n    }\n  }\n\n  CUSOLVER_CHECK(cusolverDnXgesvdr(\n      cusolverH, params_gesvdr, 'S', 'S', m, n, rank, p, iters, CUDA_R_64F, d_A,\n      m, CUDA_R_64F, d_S, CUDA_R_64F, d_U, m, CUDA_R_64F, d_V, n, CUDA_R_64F,\n      d_work, workspaceInBytesOnDevice, h_work, workspaceInBytesOnHost,\n      d_info));\n\n  CUDA_CHECK(cudaMemcpyAsync(S.data(), d_S, sizeof(double) * S.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(U.data(), d_U, sizeof(double) * U.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(V.data(), d_V, sizeof(double) * V.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(&info, d_info, sizeof(int), cudaMemcpyDeviceToHost,\n                             stream));\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  if (info < 0) {\n    throw std::runtime_error(\"Error: Invalid parameter in cusolverDnXgesvdr.\");\n  }\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_S));\n  CUDA_CHECK(cudaFree(d_U));\n  CUDA_CHECK(cudaFree(d_V));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n  free(h_work);\n\n  CUSOLVER_CHECK(cusolverDnDestroyParams(params_gesvdr));\n  CUSOLVER_CHECK(cusolverDnDestroy(cusolverH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cusolver_23__compile_error__5d0216da",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"compute_svd.h\"\n#include \"cuda_utils.h\"\n#include <stdexcept>\n\nvoid compute_svd(int64_t m, int64_t n, int64_t rank, int64_t p, int64_t iters,\n                 std::vector<double> &A, std::vector<double> &S,\n                 std::vector<double> &U, std::vector<double> &V) {\n  cusolverDnHandle_t cusolverH = NULL;\n  cusolverDnParams_t params_gesvdr = NULL;\n  cudaStream_t stream = NULL;\n\n  double *d_A = nullptr;\n  double *d_S = nullptr;\n  double *d_U = nullptr;\n  double *d_V = nullptr;\n  size_t workspaceInBytesOnDevice = 0;\n  size_t workspaceInBytesOnHost = 0;\n  void *d_work = nullptr;\n  void *h_work = nullptr;\n  int *d_info = nullptr;\n  int info = 0;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&cusolverH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(cusolverH, stream));\n  CUSOLVER_CHECK(cusolverDnCreateParams(&params_gesvdr));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_A), sizeof(double) * A.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_S), sizeof(double) * S.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_U), sizeof(double) * U.size()));\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_V), sizeof(double) * V.size()));\n  CUDA_CHECK(cudaMalloc(reinterpret_cast<void **>(&d_info), sizeof(int)));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(double) * A.size(),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnXgesvdr_bufferSize(\n      cusolverH, params_gesvdr, 'S', 'S', m, n, rank, p, iters, CUDA_R_64F, d_A,\n      m, CUDA_R_64F, d_S, CUDA_R_64F, d_U, m, CUDA_R_64F, d_V, n, CUDA_R_64F,\n      &workspaceInBytesOnDevice, &workspaceInBytesOnHost));\n\n  CUDA_CHECK(\n      cudaMalloc(reinterpret_cast<void **>(&d_work), workspaceInBytesOnDevice));\n  if (workspaceInBytesOnHost > 0) {\n    h_work = malloc(workspaceInBytesOnHost);\n    if (h_work == nullptr) {\n      throw std::runtime_error(\"Error: h_work not allocated.\");\n    }\n  }\n\n  CUSOLVER_CHECK(cusolverDnXgesvdr(\n      cusolverH, params_gesvdr, 'S', 'S', m, n, rank, p, iters, CUDA_R_64F, d_A,\n      m, CUDA_R_64F, d_S, CUDA_R_64F, d_U, m, CUDA_R_64F, d_V, n, CUDA_R_64F,\n      d_work, workspaceInBytesOnDevice, h_work, workspaceInBytesOnHost,\n      d_info));\n\n  CUDA_CHECK(cudaMemcpyAsync(S.data(), d_S, sizeof(double) * S.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(U.data(), d_U, sizeof(double) * U.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(V.data(), d_V, sizeof(double) * V.size(),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(&info, d_info, sizeof(int), cudaMemcpyDeviceToHost,\n                             stream));\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  if (info < 0) {\n    throw std::runtime_error(\"Error: Invalid parameter in cusolverDnXgesvdr.\");\n  }\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_S));\n  CUDA_CHECK(cudaFree(d_U));\n  CUDA_CHECK(cudaFree(d_V));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n  free(h_work);\n\n  CUSOLVER_CHECK(cusolverDnDestroyParams(params_gesvdr));\n  CUSOLVER_CHECK(cusolverDnDestroy(cusolverH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

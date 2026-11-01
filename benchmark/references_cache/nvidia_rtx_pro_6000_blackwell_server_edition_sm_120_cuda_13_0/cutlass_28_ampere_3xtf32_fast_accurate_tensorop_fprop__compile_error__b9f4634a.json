@@ -1,0 +1,36 @@
+{
+  "task_id": "cutlass_28_ampere_3xtf32_fast_accurate_tensorop_fprop__compile_error__b9f4634a",
+  "reference_hash": "1f0c64a1ec0dee0216994103afebc83271e802256384c89a64292bd6e20033b4",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "cutlass_ref_time_geomean",
+    "mean_ms": 0.10970073144497361,
+    "min_geomean_ms": 0.10823690928999313,
+    "per_case": [
+      {
+        "case": "small: N=1, H=56, W=56, C=64, K=64, R=3, S=3",
+        "mean_ms": 0.036,
+        "n_trials": 20,
+        "min_ms": 0.0348
+      },
+      {
+        "case": "medium: N=1, H=112, W=112, C=128, K=128, R=3, S=3",
+        "mean_ms": 0.1128,
+        "n_trials": 20,
+        "min_ms": 0.1126
+      },
+      {
+        "case": "large: N=4, H=56, W=56, C=256, K=256, R=3, S=3",
+        "mean_ms": 0.3251,
+        "n_trials": 20,
+        "min_ms": 0.3236
+      }
+    ],
+    "n_cases": 3
+  },
+  "measured_at": "2026-06-26T01:27:58Z",
+  "elapsed_total_s": 7.499347686767578,
+  "skipped": null,
+  "timing_fingerprint": "67be029bb3f7ada302960f7065708e83acd277209ace05c7a86ca2378c6af65d"
+}

@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_144__compile_error__dfbeabd6",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"kernel.h\"\n#include \"helpers.h\"\n\n__global__ void k_mmaTensorMatMulM16N8k16Int8(uint8_t *inputMatrixA_d,\n                                              uint8_t *inputMatrixB_d,\n                                              int *outputMatrix_d,\n                                              int mDim,\n                                              int nDim,\n                                              int kDim) {\n    // Tile indices.\n    int blockM = blockIdx.y;\n    int blockN = blockIdx.x;\n    int aRow = blockM * MMA_M; // starting row for this tile in A\n    int bCol = blockN * MMA_N; // starting column for this tile in B\n\n    int lane = threadIdx.x % 32;\n\n    // Shared memory:\n    // aTile holds the A tile (16x16)\n    // bTile holds the B tile (16x8)\n    extern __shared__ __align__(16) uint8_t shmem[];\n    uint8_t* aTile = shmem;\n    uint8_t* bTile = shmem + (MMA_M * MMA_K);\n\n    // Accumulator for MMA (s32) initialized to zero.\n    int accReg[4] = {0, 0, 0, 0};\n\n    int numTilesK = kDim / MMA_K;\n    for (int tileK = 0; tileK < numTilesK; tileK++) {\n        uint8_t* aG = inputMatrixA_d + aRow * kDim + tileK * MMA_K;\n        uint8_t* bG = inputMatrixB_d + (tileK * MMA_K) * nDim + bCol;\n\n        // Load A tile into shared memory.\n        for (int i = threadIdx.x; i < MMA_M * MMA_K; i += blockDim.x) {\n            int r = i / MMA_K;\n            int c = i % MMA_K;\n            int global_r = aRow + r;\n            int global_c = tileK * MMA_K + c;\n            aTile[i] = (global_r < mDim && global_c < kDim) ? aG[r * kDim + c] : 0;\n        }\n        // Load B tile into shared memory\n        for (int i = threadIdx.x; i < MMA_K * MMA_N; i += blockDim.x) {\n            int r = i / MMA_N;\n            int c = i % MMA_N;\n            int global_r = tileK * MMA_K + r;\n            int global_c = bCol + c;\n            bTile[i] = (global_r < kDim && global_c < nDim) ? bG[r * nDim + c] : 0;\n        }\n        __syncthreads();\n\n        // Load Fragments into registers\n        uint32_t fragA[2];\n        int offsetA = (lane / 4) * 16 + (lane % 4) * 4;\n        manual_load_fragment_A(&aTile[offsetA], fragA, MMA_K);\n\n        int offsetB = 32 * (lane % 4);\n        uint32_t fragB = manual_load_fragment_B(&bTile[offsetB]);\n\n        // Perform MMA accumulate.\n       asm volatile(\"mma.sync.aligned.m16n8k16.row.col.s32.u8.u8.s32.satfinite \"\n                     \"{%0,%1,%2,%3}, {%4,%5}, {%6}, {%0,%1,%2,%3};\"\n                     : \"+r\"(accReg[0]), \"+r\"(accReg[1]), \"+r\"(accReg[2]), \"+r\"(accReg[3])\n                     : \"r\"(fragA[0]), \"r\"(fragA[1]), \"r\"(fragB));\n\n        __syncthreads();\n    }\n\n    // Write the computed 16x8 output tile (from the accumulator) to global memory.\n    int* cTile = outputMatrix_d + aRow * nDim + bCol;\n\n    int block_row = lane / 4;  // 0..7\n    int block_col = lane % 4;  // 0..3\n\n    int row_out = block_row * 1;\n    int col_out = block_col * 2;\n\n\n    cTile[row_out * nDim + col_out] = accReg[0];\n    cTile[row_out * nDim + col_out + 1] = accReg[1];\n    cTile[(row_out + 8) * nDim + col_out] = accReg[2];\n    cTile[(row_out + 8) * nDim + col_out + 1] = accReg[3];\n    __syncthreads();\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_144__compile_error__dfbeabd6",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"kernel.h\"\n#include \"helpers.h\"\n\n__global__ void k_mmaTensorMatMulM16N8k16Int8(uint8_t *inputMatrixA_d,\n                                              uint8_t *inputMatrixB_d,\n                                              int *outputMatrix_d,\n                                              int mDim,\n                                              int nDim,\n                                              int kDim) {\n    // Tile indices.\n    int blockM = blockIdx.y;\n    int blockN = blockIdx.x;\n    int aRow = blockM * MMA_M; // starting row for this tile in A\n    int bCol = blockN * MMA_N; // starting column for this tile in B\n\n    int lane = threadIdx.x % 32;\n\n    // Shared memory:\n    // aTile holds the A tile (16x16)\n    // bTile holds the B tile (16x8)\n    extern __shared__ __align__(16) uint8_t shmem[];\n    uint8_t* aTile = shmem;\n    uint8_t* bTile = shmem + (MMA_M * MMA_K);\n\n    // Accumulator for MMA (s32) initialized to zero.\n    int accReg[4] = {0, 0, 0, 0};\n\n    int numTilesK = kDim / MMA_K;\n    for (int tileK = 0; tileK < numTilesK; tileK++) {\n        uint8_t* aG = inputMatrixA_d + aRow * kDim + tileK * MMA_K;\n        uint8_t* bG = inputMatrixB_d + (tileK * MMA_K) * nDim + bCol;\n\n        // Load A tile into shared memory.\n        for (int i = threadIdx.x; i < MMA_M * MMA_K; i += blockDim.x) {\n            int r = i / MMA_K;\n            int c = i % MMA_K;\n            int global_r = aRow + r;\n            int global_c = tileK * MMA_K + c;\n            aTile[i] = (global_r < mDim && global_c < kDim) ? aG[r * kDim + c] : 0;\n        }\n        // Load B tile into shared memory\n        for (int i = threadIdx.x; i < MMA_K * MMA_N; i += blockDim.x) {\n            int r = i / MMA_N;\n            int c = i % MMA_N;\n            int global_r = tileK * MMA_K + r;\n            int global_c = bCol + c;\n            bTile[i] = (global_r < kDim && global_c < nDim) ? bG[r * nDim + c] : 0;\n        }\n        __syncthreads();\n\n        // Load Fragments into registers\n        uint32_t fragA[2];\n        int offsetA = (lane / 4) * 16 + (lane % 4) * 4;\n        manual_load_fragment_A(&aTile[offsetA], fragA, MMA_K);\n\n        int offsetB = 32 * (lane % 4);\n        uint32_t fragB = manual_load_fragment_B(&bTile[offsetB]);\n\n        // Perform MMA accumulate.\n       asm volatile(\"mma.sync.aligned.m16n8k16.row.col.s32.u8.u8.s32.satfinite \"\n                     \"{%0,%1,%2,%3}, {%4,%5}, {%6}, {%0,%1,%2,%3};\"\n                     : \"+r\"(accReg[0]), \"+r\"(accReg[1]), \"+r\"(accReg[2]), \"+r\"(accReg[3])\n                     : \"r\"(fragA[0]), \"r\"(fragA[1]), \"r\"(fragB));\n\n        __syncthreads();\n    }\n\n    // Write the computed 16x8 output tile (from the accumulator) to global memory.\n    int* cTile = outputMatrix_d + aRow * nDim + bCol;\n\n    int block_row = lane / 4;  // 0..7\n    int block_col = lane % 4;  // 0..3\n\n    int row_out = block_row * 1;\n    int col_out = block_col * 2;\n\n\n    cTile[row_out * nDim + col_out] = accReg[0];\n    cTile[row_out * nDim + col_out + 1] = accReg[1];\n    cTile[(row_out + 8) * nDim + col_out] = accReg[2];\n    cTile[(row_out + 8) * nDim + col_out + 1] = accReg[3];\n    __syncthreads();\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

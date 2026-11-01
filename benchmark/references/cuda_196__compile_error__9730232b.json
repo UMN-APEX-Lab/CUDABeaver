@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_196__compile_error__9730232b",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"blur_kernel.h\"\n\n__global__ void k_blur(int width, int height, cuda::std::array<float, MAX_PIXELS>* pixel_d, cuda::std::array<float, MAX_PIXELS>* blurredPixel_d) {\n    // Blur coefficients.\n    cuda::std::array<float, BLUR_CALCULATIONS_PER_PIXEL> blurCoefficients_d = { COEFFICIENT_0, COEFFICIENT_1, COEFFICIENT_2, COEFFICIENT_3, COEFFICIENT_4, COEFFICIENT_5, COEFFICIENT_6, COEFFICIENT_7, COEFFICIENT_8 };\n    // Blur indices.\n    cuda::std::array<int, BLUR_CALCULATIONS_PER_PIXEL> blurOffsetX_d = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };\n    cuda::std::array<int, BLUR_CALCULATIONS_PER_PIXEL> blurOffsetY_d = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };\n    float inverseOfSumOfCoefficients = 1.0f / (COEFFICIENT_0 + COEFFICIENT_1 + COEFFICIENT_2 + \n                                               COEFFICIENT_3 + COEFFICIENT_4 + COEFFICIENT_5 + \n                                               COEFFICIENT_6 + COEFFICIENT_7 + COEFFICIENT_8);\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    int numberOfGlobalThreads = blockDim.x * gridDim.x;\n    int numberOfGridStrideLoopIterations = (width * height + numberOfGlobalThreads - 1) / numberOfGlobalThreads;\n    for(int gridStrideIteration = 0; gridStrideIteration < numberOfGridStrideLoopIterations; gridStrideIteration++) {\n        int pixelIndex = gridStrideIteration * numberOfGlobalThreads + globalThreadIndex;\n        int pixelPositionX = pixelIndex % width;\n        int pixelPositionY = pixelIndex / width;\n        if (pixelPositionX < width && pixelPositionY < height) {\n            int arrayIndex = 0;\n            float color = 0.0f;\n            // Applying a blur operation to the pixel at (pixelPositionX, pixelPositionY) by utilizing cuda::std::array for the offsets of neighboring pixels and the coefficients of the blur operation.\n            for(auto coeff : blurCoefficients_d) { \n                int neighborX = pixelPositionX + blurOffsetX_d[arrayIndex];\n                int neighborY = pixelPositionY + blurOffsetY_d[arrayIndex];\n                if (neighborX >= 0 && neighborX < width && neighborY >= 0 && neighborY < height) {\n                    color = cuda::std::fmaf(coeff, (*pixel_d)[neighborX + neighborY * width], color);\n                }\n                arrayIndex++;\n            };\n            (*blurredPixel_d)[pixelPositionX + pixelPositionY * width] = color * inverseOfSumOfCoefficients;\n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_196__compile_error__9730232b",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"blur_kernel.h\"\n\n__global__ void k_blur(int width, int height, cuda::std::array<float, MAX_PIXELS>* pixel_d, cuda::std::array<float, MAX_PIXELS>* blurredPixel_d) {\n    // Blur coefficients.\n    cuda::std::array<float, BLUR_CALCULATIONS_PER_PIXEL> blurCoefficients_d = { COEFFICIENT_0, COEFFICIENT_1, COEFFICIENT_2, COEFFICIENT_3, COEFFICIENT_4, COEFFICIENT_5, COEFFICIENT_6, COEFFICIENT_7, COEFFICIENT_8 };\n    // Blur indices.\n    cuda::std::array<int, BLUR_CALCULATIONS_PER_PIXEL> blurOffsetX_d = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };\n    cuda::std::array<int, BLUR_CALCULATIONS_PER_PIXEL> blurOffsetY_d = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };\n    float inverseOfSumOfCoefficients = 1.0f / (COEFFICIENT_0 + COEFFICIENT_1 + COEFFICIENT_2 + \n                                               COEFFICIENT_3 + COEFFICIENT_4 + COEFFICIENT_5 + \n                                               COEFFICIENT_6 + COEFFICIENT_7 + COEFFICIENT_8);\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    int numberOfGlobalThreads = blockDim.x * gridDim.x;\n    int numberOfGridStrideLoopIterations = (width * height + numberOfGlobalThreads - 1) / numberOfGlobalThreads;\n    for(int gridStrideIteration = 0; gridStrideIteration < numberOfGridStrideLoopIterations; gridStrideIteration++) {\n        int pixelIndex = gridStrideIteration * numberOfGlobalThreads + globalThreadIndex;\n        int pixelPositionX = pixelIndex % width;\n        int pixelPositionY = pixelIndex / width;\n        if (pixelPositionX < width && pixelPositionY < height) {\n            int arrayIndex = 0;\n            float color = 0.0f;\n            // Applying a blur operation to the pixel at (pixelPositionX, pixelPositionY) by utilizing cuda::std::array for the offsets of neighboring pixels and the coefficients of the blur operation.\n            for(auto coeff : blurCoefficients_d) { \n                int neighborX = pixelPositionX + blurOffsetX_d[arrayIndex];\n                int neighborY = pixelPositionY + blurOffsetY_d[arrayIndex];\n                if (neighborX >= 0 && neighborX < width && neighborY >= 0 && neighborY < height) {\n                    color = cuda::std::fmaf(coeff, (*pixel_d)[neighborX + neighborY * width], color);\n                }\n                arrayIndex++;\n            };\n            (*blurredPixel_d)[pixelPositionX + pixelPositionY * width] = color * inverseOfSumOfCoefficients;\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

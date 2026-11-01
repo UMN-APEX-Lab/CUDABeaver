@@ -1,24 +1,18 @@
 {
- "task_id": "cusolver_0__compile_error__b4346907",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"solve_matrix.h\"\n\nvoid solve_matrix(int N, int nrhs, const std::vector<double> &hA,\n                  const std::vector<double> &hB, std::vector<double> &hX) {\n  cusolverDnHandle_t handle{};\n  cusolverDnIRSParams_t gesv_params{};\n  cusolverDnIRSInfos_t gesv_info{};\n\n  cudaStream_t stream{};\n  CUDA_CHECK(cudaStreamCreate(&stream));\n  CUSOLVER_CHECK(cusolverDnCreate(&handle));\n  CUSOLVER_CHECK(cusolverDnSetStream(handle, stream));\n\n  CUSOLVER_CHECK(cusolverDnIRSParamsCreate(&gesv_params));\n  CUSOLVER_CHECK(cusolverDnIRSParamsSetSolverPrecisions(\n      gesv_params, CUSOLVER_R_64F, CUSOLVER_R_32F));\n  CUSOLVER_CHECK(cusolverDnIRSParamsSetRefinementSolver(\n      gesv_params, CUSOLVER_IRS_REFINE_CLASSICAL));\n  CUSOLVER_CHECK(cusolverDnIRSInfosCreate(&gesv_info));\n\n  double *dA = nullptr;\n  double *dB = nullptr;\n  double *dX = nullptr;\n  cusolver_int_t *dipiv = nullptr;\n  cusolver_int_t *dinfo = nullptr;\n  void *dwork = nullptr;\n  size_t dwork_size = 0;\n\n  CUDA_CHECK(cudaMalloc(&dA, N * N * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dB, N * nrhs * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dX, N * nrhs * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dipiv, N * sizeof(cusolver_int_t)));\n  CUDA_CHECK(cudaMalloc(&dinfo, sizeof(cusolver_int_t)));\n\n  CUDA_CHECK(cudaMemcpyAsync(dA, hA.data(), N * N * sizeof(double),\n                             cudaMemcpyHostToDevice, stream));\n  CUDA_CHECK(cudaMemcpyAsync(dB, hB.data(), N * nrhs * sizeof(double),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(\n      cusolverDnIRSXgesv_bufferSize(handle, gesv_params, N, nrhs, &dwork_size));\n  CUDA_CHECK(cudaMalloc(&dwork, dwork_size));\n\n  cusolver_int_t iter;\n  CUSOLVER_CHECK(cusolverDnIRSXgesv(handle, gesv_params, gesv_info, N, nrhs, dA,\n                                    N, dB, N, dX, N, dwork, dwork_size, &iter,\n                                    dinfo));\n\n  CUDA_CHECK(cudaMemcpyAsync(hX.data(), dX, N * nrhs * sizeof(double),\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(dA));\n  CUDA_CHECK(cudaFree(dB));\n  CUDA_CHECK(cudaFree(dX));\n  CUDA_CHECK(cudaFree(dipiv));\n  CUDA_CHECK(cudaFree(dinfo));\n  CUDA_CHECK(cudaFree(dwork));\n\n  CUSOLVER_CHECK(cusolverDnIRSInfosDestroy(gesv_info));\n  CUSOLVER_CHECK(cusolverDnIRSParamsDestroy(gesv_params));\n  CUSOLVER_CHECK(cusolverDnDestroy(handle));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cusolver_0__compile_error__b4346907",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"solve_matrix.h\"\n\nvoid solve_matrix(int N, int nrhs, const std::vector<double> &hA,\n                  const std::vector<double> &hB, std::vector<double> &hX) {\n  cusolverDnHandle_t handle{};\n  cusolverDnIRSParams_t gesv_params{};\n  cusolverDnIRSInfos_t gesv_info{};\n\n  cudaStream_t stream{};\n  CUDA_CHECK(cudaStreamCreate(&stream));\n  CUSOLVER_CHECK(cusolverDnCreate(&handle));\n  CUSOLVER_CHECK(cusolverDnSetStream(handle, stream));\n\n  CUSOLVER_CHECK(cusolverDnIRSParamsCreate(&gesv_params));\n  CUSOLVER_CHECK(cusolverDnIRSParamsSetSolverPrecisions(\n      gesv_params, CUSOLVER_R_64F, CUSOLVER_R_32F));\n  CUSOLVER_CHECK(cusolverDnIRSParamsSetRefinementSolver(\n      gesv_params, CUSOLVER_IRS_REFINE_CLASSICAL));\n  CUSOLVER_CHECK(cusolverDnIRSInfosCreate(&gesv_info));\n\n  double *dA = nullptr;\n  double *dB = nullptr;\n  double *dX = nullptr;\n  cusolver_int_t *dipiv = nullptr;\n  cusolver_int_t *dinfo = nullptr;\n  void *dwork = nullptr;\n  size_t dwork_size = 0;\n\n  CUDA_CHECK(cudaMalloc(&dA, N * N * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dB, N * nrhs * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dX, N * nrhs * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&dipiv, N * sizeof(cusolver_int_t)));\n  CUDA_CHECK(cudaMalloc(&dinfo, sizeof(cusolver_int_t)));\n\n  CUDA_CHECK(cudaMemcpyAsync(dA, hA.data(), N * N * sizeof(double),\n                             cudaMemcpyHostToDevice, stream));\n  CUDA_CHECK(cudaMemcpyAsync(dB, hB.data(), N * nrhs * sizeof(double),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(\n      cusolverDnIRSXgesv_bufferSize(handle, gesv_params, N, nrhs, &dwork_size));\n  CUDA_CHECK(cudaMalloc(&dwork, dwork_size));\n\n  cusolver_int_t iter;\n  CUSOLVER_CHECK(cusolverDnIRSXgesv(handle, gesv_params, gesv_info, N, nrhs, dA,\n                                    N, dB, N, dX, N, dwork, dwork_size, &iter,\n                                    dinfo));\n\n  CUDA_CHECK(cudaMemcpyAsync(hX.data(), dX, N * nrhs * sizeof(double),\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(dA));\n  CUDA_CHECK(cudaFree(dB));\n  CUDA_CHECK(cudaFree(dX));\n  CUDA_CHECK(cudaFree(dipiv));\n  CUDA_CHECK(cudaFree(dinfo));\n  CUDA_CHECK(cudaFree(dwork));\n\n  CUSOLVER_CHECK(cusolverDnIRSInfosDestroy(gesv_info));\n  CUSOLVER_CHECK(cusolverDnIRSParamsDestroy(gesv_params));\n  CUSOLVER_CHECK(cusolverDnDestroy(handle));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_127__compile_error__a7b4a675",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"angular_momentum.h\"\n\n__global__ void k_computeAngularMomentum(const float *mass_d, const float3 *pos_d, const float3 *vel_d, float3 *totalAM_d, unsigned int particleCount) {\n    unsigned int threadId = blockIdx.x * blockDim.x + threadIdx.x;\n    unsigned int stride   = blockDim.x * gridDim.x;\n\n    float3 L = make_float3(0.0f, 0.0f, 0.0f);\n\n    for (unsigned int i = threadId; i < particleCount; i += stride) {\n        float m = mass_d[i];\n        float3 pos = pos_d[i];\n        float3 vel = vel_d[i];\n\n        float3 tmp;\n        tmp.x = m * (pos.y * vel.z - pos.z * vel.y);\n        tmp.y = m * (pos.z * vel.x - pos.x * vel.z);\n        tmp.z = m * (pos.x * vel.y - pos.y * vel.x);\n\n        L.x += tmp.x;\n        L.y += tmp.y;\n        L.z += tmp.z;\n    }\n\n    unsigned int mask = 0xffffffff;\n    for (int offset = warpSize / 2; offset > 0; offset /= 2) {\n        L.x += __shfl_down_sync(mask, L.x, offset);\n        L.y += __shfl_down_sync(mask, L.y, offset);\n        L.z += __shfl_down_sync(mask, L.z, offset);\n    }\n\n    if ((threadIdx.x & (warpSize - 1)) == 0) {\n        atomicAdd(&(totalAM_d->x), L.x);\n        atomicAdd(&(totalAM_d->y), L.y);\n        atomicAdd(&(totalAM_d->z), L.z);\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_127__compile_error__a7b4a675",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"angular_momentum.h\"\n\n__global__ void k_computeAngularMomentum(const float *mass_d, const float3 *pos_d, const float3 *vel_d, float3 *totalAM_d, unsigned int particleCount) {\n    unsigned int threadId = blockIdx.x * blockDim.x + threadIdx.x;\n    unsigned int stride   = blockDim.x * gridDim.x;\n\n    float3 L = make_float3(0.0f, 0.0f, 0.0f);\n\n    for (unsigned int i = threadId; i < particleCount; i += stride) {\n        float m = mass_d[i];\n        float3 pos = pos_d[i];\n        float3 vel = vel_d[i];\n\n        float3 tmp;\n        tmp.x = m * (pos.y * vel.z - pos.z * vel.y);\n        tmp.y = m * (pos.z * vel.x - pos.x * vel.z);\n        tmp.z = m * (pos.x * vel.y - pos.y * vel.x);\n\n        L.x += tmp.x;\n        L.y += tmp.y;\n        L.z += tmp.z;\n    }\n\n    unsigned int mask = 0xffffffff;\n    for (int offset = warpSize / 2; offset > 0; offset /= 2) {\n        L.x += __shfl_down_sync(mask, L.x, offset);\n        L.y += __shfl_down_sync(mask, L.y, offset);\n        L.z += __shfl_down_sync(mask, L.z, offset);\n    }\n\n    if ((threadIdx.x & (warpSize - 1)) == 0) {\n        atomicAdd(&(totalAM_d->x), L.x);\n        atomicAdd(&(totalAM_d->y), L.y);\n        atomicAdd(&(totalAM_d->z), L.z);\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

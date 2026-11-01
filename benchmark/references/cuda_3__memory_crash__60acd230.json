@@ -1,19 +1,19 @@
 {
- "task_id": "cuda_3__memory_crash__60acd230",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "// file: solution.cu\n#include \"kernel_launch.h\"\n#include <cuda.h>\n#include <cuda_runtime.h>\n\nvoid launch(int gridSizeX, int blockSizeX, int gridSizeY, int blockSizeY, int gridSizeZ,\n            int blockSizeZ)\n{\n    int *output, *input;\n    dim3 threadsPerBlock(blockSizeX, blockSizeY, blockSizeZ);\n    dim3 numBlocks(gridSizeX, gridSizeY, gridSizeZ);\n\n    // Kernel invocation with runtime cluster size\n    {\n        cudaLaunchConfig_t config = {0};\n        config.gridDim            = numBlocks;\n        config.blockDim           = threadsPerBlock;\n\n        cudaLaunchKernelEx(&config, kernel, output, input);\n    }\n}\n"
-   }
-  ]
- },
- "benchmark_command": "./test.out",
- "timing_mode": {
-  "type": "total_elapsed"
- },
- "n_trials": 1,
- "warmup_trials": 0,
- "requires_arch": null
+  "task_id": "cuda_3__memory_crash__60acd230",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "// file: solution.cu\n#include \"kernel_launch.h\"\n#include <cuda_runtime.h>\n\nvoid launch(int gridSizeX, int blockSizeX, int gridSizeY, int blockSizeY, int gridSizeZ,\n            int blockSizeZ)\n{\n    dim3 grid(gridSizeX, gridSizeY, gridSizeZ);\n    dim3 block(blockSizeX, blockSizeY, blockSizeZ);\n    size_t count = size_t(grid.x) * grid.y * grid.z * block.x * block.y * block.z;\n\n    int *output = nullptr;\n    int *input = nullptr;\n    cudaMalloc(&output, count * sizeof(int));\n    cudaMalloc(&input, count * sizeof(int));\n    cudaMemset(input, 0, count * sizeof(int));\n\n    kernel<<<grid, block>>>(output, input);\n    cudaDeviceSynchronize();\n\n    cudaFree(output);\n    cudaFree(input);\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "nvcc -I include -o bench.out solution.cu benchmark/benchmark_kernel.cu benchmark/benchmark_main.cu && ./bench.out",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
 }

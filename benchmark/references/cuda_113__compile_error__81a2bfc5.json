@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_113__compile_error__81a2bfc5",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"temperature_distribution.h\"\n\nnamespace cg = cooperative_groups;\n\n__global__ void k_temperatureDistribution(float *temperatureValues, int numPlateElementsX, int numPlateElementsY, int numIterations) {\n    // Cooperative Grid Group\n    cg::grid_group grid = cg::this_grid();\n\n    float *src = temperatureValues;\n    float *dst = alternateBuffer_d;\n\n    // Global column index\n    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;\n    // Global row index\n    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if ((xIndex >= numPlateElementsX) || (yIndex >= numPlateElementsY)) {\n        return;\n    }      \n\n    for (int iter = 0; iter < numIterations; iter++) {\n        // Compute new temperature values\n        if ((xIndex > 0) && (xIndex < numPlateElementsX - 1) && (yIndex > 0) && (yIndex < numPlateElementsY - 1)) {\n            float topVal    = src[(yIndex - 1) * numPlateElementsX + xIndex];\n            float bottomVal = src[(yIndex + 1) * numPlateElementsX + xIndex];\n            float leftVal   = src[yIndex * numPlateElementsX + (xIndex - 1)];\n            float rightVal  = src[yIndex * numPlateElementsX + (xIndex + 1)];\n\n            float updatedTemperature = (topVal + bottomVal + leftVal + rightVal) / 4;\n            dst[yIndex * numPlateElementsX + xIndex] = updatedTemperature;\n        }\n\n        // Ensure computation is complete across all blocks before loading values for next itertation\n        grid.sync();\n        \n        // Swap the read and write buffers\n        float *temp = src;\n        src = dst;\n        dst = temp;\n    }\n    \n    if((numIterations % 2) == 1) {\n        // Write updated values back to global memory\n        temperatureValues[yIndex * numPlateElementsX + xIndex] = src[yIndex * numPlateElementsX + xIndex];\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_113__compile_error__81a2bfc5",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"temperature_distribution.h\"\n\nnamespace cg = cooperative_groups;\n\n__global__ void k_temperatureDistribution(float *temperatureValues, int numPlateElementsX, int numPlateElementsY, int numIterations) {\n    // Cooperative Grid Group\n    cg::grid_group grid = cg::this_grid();\n\n    float *src = temperatureValues;\n    float *dst = alternateBuffer_d;\n\n    // Global column index\n    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;\n    // Global row index\n    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;\n\n    if ((xIndex >= numPlateElementsX) || (yIndex >= numPlateElementsY)) {\n        return;\n    }      \n\n    for (int iter = 0; iter < numIterations; iter++) {\n        // Compute new temperature values\n        if ((xIndex > 0) && (xIndex < numPlateElementsX - 1) && (yIndex > 0) && (yIndex < numPlateElementsY - 1)) {\n            float topVal    = src[(yIndex - 1) * numPlateElementsX + xIndex];\n            float bottomVal = src[(yIndex + 1) * numPlateElementsX + xIndex];\n            float leftVal   = src[yIndex * numPlateElementsX + (xIndex - 1)];\n            float rightVal  = src[yIndex * numPlateElementsX + (xIndex + 1)];\n\n            float updatedTemperature = (topVal + bottomVal + leftVal + rightVal) / 4;\n            dst[yIndex * numPlateElementsX + xIndex] = updatedTemperature;\n        }\n\n        // Ensure computation is complete across all blocks before loading values for next itertation\n        grid.sync();\n        \n        // Swap the read and write buffers\n        float *temp = src;\n        src = dst;\n        dst = temp;\n    }\n    \n    if((numIterations % 2) == 1) {\n        // Write updated values back to global memory\n        temperatureValues[yIndex * numPlateElementsX + xIndex] = src[yIndex * numPlateElementsX + xIndex];\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

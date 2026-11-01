@@ -1,15 +1,14 @@
 {
- "task_id": "kernelbench_level2_7__compile_error__f3b7b2e0",
- "reference_solution": {
-  "type": "kernelbench_problem",
-  "problem_path": "kernelbench/KernelBench/level2/7_Conv3d_ReLU_LeakyReLU_GELU_Sigmoid_BiasAdd.py",
-  "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a 3D convolution, applies ReLU, LeakyReLU, GELU, Sigmoid activations, and bias in sequence.\n    \"\"\"\n    def __init__(self, in_channels, out_channels, kernel_size, bias_shape):\n        super(Model, self).__init__()\n        self.conv = nn.Conv3d(in_channels, out_channels, kernel_size)\n        self.bias = nn.Parameter(torch.randn(bias_shape)) \n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.relu(x)\n        x = torch.nn.functional.leaky_relu(x, negative_slope=0.01)\n        x = torch.nn.functional.gelu(x)\n        x = torch.sigmoid(x)\n        x = x + self.bias\n        return x\n\nbatch_size = 64\nin_channels = 8\nout_channels = 32\ndepth, height, width = 32, 64, 64\nkernel_size = 3\nbias_shape = (out_channels, 1, 1, 1)\n\ndef get_inputs():\n    return [torch.rand(batch_size, in_channels, depth, height, width)]\n\ndef get_init_inputs():\n    return [in_channels, out_channels, kernel_size, bias_shape]"
- },
- "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Hopper']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, num_perf_trials=10, timing_method='cuda_event', num_correct_trials=2, backend='cuda', precision=get_torch_dtype_from_string('fp32')); print(result)\"",
- "timing_mode": {
-  "type": "kernelbench_eval_result"
- },
- "n_trials": 10,
- "warmup_trials": 0,
- "requires_arch": null
+  "task_id": "kernelbench_level2_7__compile_error__f3b7b2e0",
+  "reference_solution": {
+    "type": "kernelbench_problem",
+    "problem_path": "testbench/kernelbench_level2_7/problem.py",
+    "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a 3D convolution, applies ReLU, LeakyReLU, GELU, Sigmoid activations, and bias in sequence.\n    \"\"\"\n    def __init__(self, in_channels, out_channels, kernel_size, bias_shape):\n        super(Model, self).__init__()\n        self.conv = nn.Conv3d(in_channels, out_channels, kernel_size)\n        self.bias = nn.Parameter(torch.randn(bias_shape)) \n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.relu(x)\n        x = torch.nn.functional.leaky_relu(x, negative_slope=0.01)\n        x = torch.nn.functional.gelu(x)\n        x = torch.sigmoid(x)\n        x = x + self.bias\n        return x\n\nbatch_size = 64\nin_channels = 8\nout_channels = 32\ndepth, height, width = 32, 64, 64\nkernel_size = 3\nbias_shape = (out_channels, 1, 1, 1)\n\ndef get_inputs():\n    return [torch.rand(batch_size, in_channels, depth, height, width)]\n\ndef get_init_inputs():\n    return [in_channels, out_channels, kernel_size, bias_shape]"
+  },
+  "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Blackwell']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, timing_method='cuda_event', num_correct_trials=2, num_perf_trials=100, backend='cuda', precision=get_torch_dtype_from_string('fp32'), check_for_excessive_speedup=False); print(result); raise SystemExit(0 if (result and result.compiled and result.correctness and result.runtime_stats) else 1)\"",
+  "timing_mode": {
+    "type": "kernelbench_eval_result"
+  },
+  "n_trials": 100,
+  "warmup_trials": 0
 }

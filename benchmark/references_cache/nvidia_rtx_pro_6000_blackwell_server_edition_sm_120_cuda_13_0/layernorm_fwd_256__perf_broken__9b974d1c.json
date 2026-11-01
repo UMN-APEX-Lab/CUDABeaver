@@ -1,0 +1,18 @@
+{
+  "task_id": "layernorm_fwd_256__perf_broken__9b974d1c",
+  "reference_hash": "06e880ec93c7e60a4e155b0cdf866f32be3657ad8a35a896aff0287c6c853c32",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "applied_kernels_make_speedup",
+    "mean_ms": 0.0,
+    "n_trials": 1,
+    "kh_internal_ref_ms": 0.0,
+    "kh_internal_speedup": 0.0,
+    "warmup_trials": 0
+  },
+  "measured_at": "2026-06-26T01:20:16Z",
+  "elapsed_total_s": 16.53778910636902,
+  "skipped": null,
+  "timing_fingerprint": "a955827b360b4232309e819de6efb567c2e98966331a117b3b75a15fd6e9234c"
+}

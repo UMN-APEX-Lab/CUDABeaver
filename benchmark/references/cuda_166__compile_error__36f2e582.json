@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_166__compile_error__36f2e582",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"kernel_contract.h\"\n\n__global__ void k_calculateDifferencesFromPowerOfAveragePerChunk(   int32_t * input_d, \n                                                                    float * output_d, \n                                                                    int numChunks) {\n    // Each thread index will compute a different set of four chunks for writing coalesced output.\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    \n    // Grid-stride loop that supports any number of chunks.\n    int numGlobalThreads = blockDim.x * gridDim.x;\n    int numIterations = (numChunks + numGlobalThreads - 1) / numGlobalThreads;\n    for(int iteration = 0; iteration < numIterations; iteration++) {\n        int chunkId = numGlobalThreads * iteration + globalThreadIndex;\n        // Processing data from the current iteration.\n        if(chunkId < numChunks) {\n            // Reading inputs in a coalesced form to hide latency.\n            // Loading four consecutive integers as a single int4 data.\n            int4 data = *reinterpret_cast<int4*>(&input_d[chunkId * CHUNK_ELEMENTS]);\n            // Computing.\n            float average = data.x * 0.25f + data.y * 0.25f + data.z * 0.25f + data.w * 0.25f;\n            // Finding highest bit count.\n            int bitCount = __popc(data.x) > __popc(data.y) ? __popc(data.x) : __popc(data.y);\n            bitCount = (bitCount > __popc(data.z) ? bitCount : __popc(data.z));\n            bitCount = (bitCount > __popc(data.w) ? bitCount : __popc(data.w));\n            float4 result = { \n                data.x - powf(average, (float)bitCount),\n                data.y - powf(average, (float)bitCount),\n                data.z - powf(average, (float)bitCount),\n                data.w - powf(average, (float)bitCount)\n            };\n            // Writing results in a coalesced form to minimize latency.\n            *reinterpret_cast<float4*>(&output_d[chunkId * CHUNK_ELEMENTS]) = result; \n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_166__compile_error__36f2e582",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"kernel_contract.h\"\n\n__global__ void k_calculateDifferencesFromPowerOfAveragePerChunk(   int32_t * input_d, \n                                                                    float * output_d, \n                                                                    int numChunks) {\n    // Each thread index will compute a different set of four chunks for writing coalesced output.\n    int globalThreadIndex = threadIdx.x + blockIdx.x * blockDim.x;\n    \n    // Grid-stride loop that supports any number of chunks.\n    int numGlobalThreads = blockDim.x * gridDim.x;\n    int numIterations = (numChunks + numGlobalThreads - 1) / numGlobalThreads;\n    for(int iteration = 0; iteration < numIterations; iteration++) {\n        int chunkId = numGlobalThreads * iteration + globalThreadIndex;\n        // Processing data from the current iteration.\n        if(chunkId < numChunks) {\n            // Reading inputs in a coalesced form to hide latency.\n            // Loading four consecutive integers as a single int4 data.\n            int4 data = *reinterpret_cast<int4*>(&input_d[chunkId * CHUNK_ELEMENTS]);\n            // Computing.\n            float average = data.x * 0.25f + data.y * 0.25f + data.z * 0.25f + data.w * 0.25f;\n            // Finding highest bit count.\n            int bitCount = __popc(data.x) > __popc(data.y) ? __popc(data.x) : __popc(data.y);\n            bitCount = (bitCount > __popc(data.z) ? bitCount : __popc(data.z));\n            bitCount = (bitCount > __popc(data.w) ? bitCount : __popc(data.w));\n            float4 result = { \n                data.x - powf(average, (float)bitCount),\n                data.y - powf(average, (float)bitCount),\n                data.z - powf(average, (float)bitCount),\n                data.w - powf(average, (float)bitCount)\n            };\n            // Writing results in a coalesced form to minimize latency.\n            *reinterpret_cast<float4*>(&output_d[chunkId * CHUNK_ELEMENTS]) = result; \n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_87__compile_error__0e66ba5e",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"negate_and_prefix_sum.h\"\n#include <thrust/transform_scan.h>\n\nthrust::device_vector<int> negate_and_prefix_sum(const thrust::device_vector<int> &vec)\n{\n    thrust::device_vector<int> res(vec.size());\n    thrust::transform_exclusive_scan(\n        vec.begin(), vec.end(), res.begin(), [=] __host__ __device__(int x) { return -x; }, 0,\n        thrust::plus<int>());\n\n    return res;\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_87__compile_error__0e66ba5e",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"negate_and_prefix_sum.h\"\n#include <thrust/transform_scan.h>\n\nthrust::device_vector<int> negate_and_prefix_sum(const thrust::device_vector<int> &vec)\n{\n    thrust::device_vector<int> res(vec.size());\n    thrust::transform_exclusive_scan(\n        vec.begin(), vec.end(), res.begin(), [=] __host__ __device__(int x) { return -x; }, 0,\n        thrust::plus<int>());\n\n    return res;\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

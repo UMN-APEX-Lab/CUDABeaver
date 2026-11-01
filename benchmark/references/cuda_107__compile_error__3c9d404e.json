@@ -1,21 +1,18 @@
 {
- "task_id": "cuda_107__compile_error__3c9d404e",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"heatmap.h\"\n\n__global__ void k_generateHeatmap(float * input_d, \n                                  unsigned char * output_d, \n                                  const float minValue, \n                                  const float maxValue,\n                                  const int numElementsX,\n                                  const int numElementsY) {\n    const int threadX = threadIdx.x + blockIdx.x * blockDim.x;\n    const int threadY = threadIdx.y + blockIdx.y * blockDim.y;\n    const int strideSizeX = blockDim.x * gridDim.x;\n    const int strideSizeY = blockDim.y * gridDim.y;\n    const int numStrideLoopIterationsX = 1 + (numElementsX - 1) / strideSizeX;\n    const int numStrideLoopIterationsY = 1 + (numElementsY - 1) / strideSizeY;\n    const float reciprocalDifference = 1.0f / (maxValue - minValue);\n    for(int strideY = 0; strideY < numStrideLoopIterationsY; strideY++) {\n        for(int strideX = 0; strideX < numStrideLoopIterationsX; strideX++) {\n            const int itemX = threadX + (strideX * strideSizeX);\n            const int itemY = threadY + (strideY * strideSizeY);\n            const int itemId = itemX + itemY * numElementsX;\n            if(itemX < numElementsX && itemY < numElementsY) {\n                const float data = input_d[itemId];\n                // Clamping and normalizing the input.\n                const float clampedData = fminf(fmaxf(data, minValue), maxValue);\n                const float normalizedData = (clampedData - minValue) * reciprocalDifference;\n                // In order to ensure that the result aligns with the designated output range, it is essential to round it to the nearest integer.\n                const unsigned char output = round(normalizedData * SCALING_VALUE);\n                output_d[itemId] = output;\n            }\n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "kernels",
-  "include": null,
-  "exclude": null
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_107__compile_error__3c9d404e",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"heatmap.h\"\n\n__global__ void k_generateHeatmap(float * input_d, \n                                  unsigned char * output_d, \n                                  const float minValue, \n                                  const float maxValue,\n                                  const int numElementsX,\n                                  const int numElementsY) {\n    const int threadX = threadIdx.x + blockIdx.x * blockDim.x;\n    const int threadY = threadIdx.y + blockIdx.y * blockDim.y;\n    const int strideSizeX = blockDim.x * gridDim.x;\n    const int strideSizeY = blockDim.y * gridDim.y;\n    const int numStrideLoopIterationsX = 1 + (numElementsX - 1) / strideSizeX;\n    const int numStrideLoopIterationsY = 1 + (numElementsY - 1) / strideSizeY;\n    const float reciprocalDifference = 1.0f / (maxValue - minValue);\n    for(int strideY = 0; strideY < numStrideLoopIterationsY; strideY++) {\n        for(int strideX = 0; strideX < numStrideLoopIterationsX; strideX++) {\n            const int itemX = threadX + (strideX * strideSizeX);\n            const int itemY = threadY + (strideY * strideSizeY);\n            const int itemId = itemX + itemY * numElementsX;\n            if(itemX < numElementsX && itemY < numElementsY) {\n                const float data = input_d[itemId];\n                // Clamping and normalizing the input.\n                const float clampedData = fminf(fmaxf(data, minValue), maxValue);\n                const float normalizedData = (clampedData - minValue) * reciprocalDifference;\n                // In order to ensure that the result aligns with the designated output range, it is essential to round it to the nearest integer.\n                const unsigned char output = round(normalizedData * SCALING_VALUE);\n                output_d[itemId] = output;\n            }\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

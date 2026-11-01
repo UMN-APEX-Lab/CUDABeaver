@@ -1,20 +1,22 @@
 {
- "task_id": "cuda_115__compile_error__778ab761",
- "reference_hash": "4f30a9c5c210ac82570d03f4d510bb3a337bb93000a21d31bd6b8905e0027cca",
- "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
- "cuda_version": "13.0",
- "timing": {
-  "method": "region/bench_region",
-  "mean_ms": 1312.152929,
-  "p50_ms": 1312.152929,
-  "p95_ms": 1312.152929,
-  "stddev_ms": 0.0,
-  "raw_samples_ms": [],
-  "n_instances": 1,
-  "n_trials": 100,
-  "warmup_trials": 3
- },
- "measured_at": "2026-04-22T02:28:39Z",
- "elapsed_total_s": 9.520778179168701,
- "skipped": null
+  "task_id": "cuda_115__compile_error__778ab761",
+  "reference_hash": "4f30a9c5c210ac82570d03f4d510bb3a337bb93000a21d31bd6b8905e0027cca",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "cuda_event_stdout",
+    "mean_ms": 0.647550232,
+    "p50_ms": 0.647550232,
+    "p95_ms": 0.647550232,
+    "stddev_ms": 0.0,
+    "raw_samples_ms": [],
+    "n_instances": 2000,
+    "total_ms": 1295.100463867,
+    "n_trials": 100,
+    "warmup_trials": 3
+  },
+  "measured_at": "2026-06-26T01:07:45Z",
+  "elapsed_total_s": 2.4617958068847656,
+  "skipped": null,
+  "timing_fingerprint": "02d704175a234eeb1e03248f426dd2f253344236a1aa3e63f899c7f0a0d8a3da"
 }

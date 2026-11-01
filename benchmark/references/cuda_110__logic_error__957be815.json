@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_110__logic_error__957be815",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"bitonic_sort.h\"\n#include \"common.h\"\n#include <cfloat>\n\n__global__ void k_bitonicSort(float* inputData, int size) {\n    int threadId = threadIdx.x + blockIdx.x * blockDim.x;\n    int localIdx = threadIdx.x;\n\n    // Shared memory array to store part of the data for sorting\n    extern __shared__ float sharedData[];\n\n    // Each thread loads data into shared memory\n    sharedData[localIdx] = (threadId < size) ? inputData[threadId] : FLT_MAX;\n    __syncthreads();\n\n    // Perform Bitonic Sort using shared memory\n    for (int stage = 2; stage <= BLOCK_SIZE; stage *= 2) {\n        for (int stride = stage / 2; stride > 0; stride /= 2) {\n            // Compute comparison indices\n            int compareIdx = localIdx ^ stride;\n\n            // Ensure threads stay within bounds\n            if (compareIdx > localIdx) {\n                // Sorting direction depends on stage\n                bool ascending = ((localIdx & stage) == 0);\n\n                // Compare and swap\n                if (ascending == (sharedData[localIdx] > sharedData[compareIdx])) {\n                    float temp = sharedData[localIdx];\n                    sharedData[localIdx] = sharedData[compareIdx];\n                    sharedData[compareIdx] = temp;\n                }\n            }\n            __syncthreads(); // Synchronize after each stride\n        }\n    }\n\n    // Write the sorted data back to global memory\n    if (threadId < size) {\n        inputData[threadId] = sharedData[localIdx];\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_110__logic_error__957be815",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"bitonic_sort.h\"\n#include \"common.h\"\n#include <cfloat>\n\n__global__ void k_bitonicSort(float* inputData, int size) {\n    int threadId = threadIdx.x + blockIdx.x * blockDim.x;\n    int localIdx = threadIdx.x;\n\n    // Shared memory array to store part of the data for sorting\n    extern __shared__ float sharedData[];\n\n    // Each thread loads data into shared memory\n    sharedData[localIdx] = (threadId < size) ? inputData[threadId] : FLT_MAX;\n    __syncthreads();\n\n    // Perform Bitonic Sort using shared memory\n    for (int stage = 2; stage <= BLOCK_SIZE; stage *= 2) {\n        for (int stride = stage / 2; stride > 0; stride /= 2) {\n            // Compute comparison indices\n            int compareIdx = localIdx ^ stride;\n\n            // Ensure threads stay within bounds\n            if (compareIdx > localIdx) {\n                // Sorting direction depends on stage\n                bool ascending = ((localIdx & stage) == 0);\n\n                // Compare and swap\n                if (ascending == (sharedData[localIdx] > sharedData[compareIdx])) {\n                    float temp = sharedData[localIdx];\n                    sharedData[localIdx] = sharedData[compareIdx];\n                    sharedData[compareIdx] = temp;\n                }\n            }\n            __syncthreads(); // Synchronize after each stride\n        }\n    }\n\n    // Write the sorted data back to global memory\n    if (threadId < size) {\n        inputData[threadId] = sharedData[localIdx];\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

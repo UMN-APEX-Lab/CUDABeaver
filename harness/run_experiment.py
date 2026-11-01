@@ -36,6 +36,7 @@ from .generate_headers import setup_include_dir
 from .llm_client import call_llm, extract_code, create_client
 from .memory_updater import update_memory
 from .metrics import compute_task_metrics, compute_aggregate_metrics, metrics_to_dict
+from .performance import evaluate_performance_gate as _evaluate_performance_gate
 from .benchmark import (
     run_candidate as _bench_run_candidate,
     load_reference as _bench_load_reference,
@@ -43,6 +44,13 @@ from .benchmark import (
     compute_speedup as _bench_compute_speedup,
 )
 from .stagnation import check_stagnation, make_record as make_stagnation_record
+from .task_registry import (
+    broken_start_map,
+    discover_task_stems,
+    load_input_meta,
+    load_prompt_text,
+    task_error_category,
+)
 
 logger = logging.getLogger("cuda_debugger_exp")
 
@@ -54,23 +62,44 @@ SYSTEM_PROMPT_CUDA = """\
 You are an expert CUDA programmer. You will be given a task description \
 for writing CUDA kernel code. Write ONLY the solution code that should go \
 into `solution.cu`. Do not include any explanation, just the code. \
-Do not include a main function — the test harness provides one."""
+Do not include a main function — the test harness provides one.
+
+OUTPUT REQUIREMENT:
+- do not overthink.
+- You must generate the complete contents of `solution.cu` before stopping.
+- Do not emit prose, markdown, comments outside the code, or analysis."""
 
 SYSTEM_PROMPT_PYTHON = """\
 You are an expert CUDA/PyTorch programmer. You will be given a task description \
 for writing a custom CUDA kernel as a PyTorch extension. Write ONLY the solution \
-code that should go into `solution.py`. Do not include any explanation, just the code."""
+code that should go into `solution.py`. Do not include any explanation, just the code.
+
+OUTPUT REQUIREMENT:
+- do not overthink.
+- You must generate the complete contents of `solution.py` before stopping.
+- Do not emit prose, markdown, comments outside the code, or analysis."""
 
 SYSTEM_PROMPT_GENERIC = """\
 You are an expert CUDA programmer. You will be given a task description \
 for writing CUDA kernel code. Write ONLY the solution code that should go \
-into `{solution_file}`. Do not include any explanation, just the code."""
+into `{solution_file}`. Do not include any explanation, just the code.
+
+OUTPUT REQUIREMENT:
+- do not overthink.
+- You must generate the complete contents of `{solution_file}` before stopping.
+- Do not emit prose, markdown, comments outside the code, or analysis."""
 
 FIRST_TURN_TEMPLATE = """\
 Write the code for the following task. Output ONLY the content of `{solution_file}`.
 
 ## Task Description
 {prompt}
+{performance_requirement}
+
+OUTPUT REQUIREMENT:
+- do not overthink.
+- You must generate the complete contents of `{solution_file}` before stopping.
+- Output only code.
 """
 
 # v2 debug-mode prompt: model starts from a broken implementation rather than
@@ -94,8 +123,14 @@ The following code is in `{solution_file}` and currently fails:
 ## Why it fails
 Error category: `{error_category}`
 {error_excerpt}
+{performance_requirement}
 
 Output the fixed full contents of `{solution_file}`.
+
+OUTPUT REQUIREMENT:
+- do not overthink.
+- You must generate the complete fixed contents of `{solution_file}` before stopping.
+- Output only code.
 """
 
 
@@ -210,6 +245,84 @@ def _performance_gate_config(config: dict) -> dict | None:
     }
 
 
+def _measure_pass_performance_enabled(config: dict) -> bool:
+    """Whether to run post-pass benchmark timing for manifest metadata."""
+    exp = config.get("experiment", {}) or {}
+    return bool(exp.get("measure_perf_on_pass", True))
+
+
+def _performance_requirement_section(performance_gate: dict | None) -> str:
+    if not performance_gate or not performance_gate.get("enabled", True):
+        return ""
+    threshold = float(performance_gate.get("min_speedup", 0.0))
+    return (
+        "\n## Performance Requirement\n"
+        f"- A candidate only passes if it is correct and reaches >= {threshold:.3f}x "
+        "reference speedup.\n"
+        "- Fix the bug without replacing parallel CUDA work with a slow serial "
+        "fallback; preserve or improve memory coalescing, occupancy, and launch "
+        "efficiency where relevant.\n"
+    )
+
+
+def _classification_from_perf_gate(perf: dict, perf_gate: dict) -> dict:
+    threshold = float(perf_gate.get("min_speedup", 0.0))
+    if "speedup" in perf_gate:
+        category = "perf_below_threshold"
+        error_type = "perf_gate"
+        detail = (
+            f"correctness OK but speedup {float(perf_gate['speedup']):.3f}x "
+            f"< {threshold:.3f}x reference"
+        )
+    else:
+        category = "perf_unmeasured"
+        error_type = "perf_gate_unmeasured"
+        reason = perf_gate.get("reason", "performance_unmeasured")
+        detail = f"correctness OK but performance gate failed: {reason}"
+    return {
+        "category": category,
+        "five_category": "logic_error",
+        "error_type": error_type,
+        "build_ok": True,
+        "status": "failed",
+        "logic_error_detail": detail,
+        "performance_gate": perf_gate,
+    }
+
+
+def _classification_passed_from_perf_gate(perf_gate: dict) -> dict:
+    return {
+        "category": "passed",
+        "five_category": "passed",
+        "error_type": None,
+        "build_ok": True,
+        "status": "passed",
+        "logic_error_category": None,
+        "logic_error_detail": None,
+        "performance_gate": perf_gate,
+    }
+
+
+def _needs_reference_perf_measurement(classification: dict) -> bool:
+    """Correctness passed, but stdout did not contain a usable speedup.
+
+    CUDA/CUDABench tests commonly report only correctness in stdout. In that
+    case the runner must use the reference-performance cache before enforcing
+    fail_on_skipped; otherwise correct CUDA fixes get mislabeled as
+    perf_unmeasured before the benchmark adapter has a chance to run.
+    """
+    return (
+        classification.get("category") == "perf_unmeasured"
+        and classification.get("error_type") == "perf_gate_unmeasured"
+        and bool(classification.get("build_ok"))
+    )
+
+
+def _has_stdout_perf_gate(classification: dict) -> bool:
+    gate = classification.get("performance_gate") or {}
+    return "speedup" in gate and gate.get("passed") is not None
+
+
 # compile_code, run_test → compiler.py
 # call_llm, extract_code → llm_client.py
 
@@ -219,7 +332,13 @@ def _performance_gate_config(config: dict) -> dict | None:
 # ---------------------------------------------------------------------------
 
 
-def _measure_iter_perf(task_id: str, code: str, solution_file: str, test_output: str | None = None) -> dict:
+def _measure_iter_perf(
+    task_id: str,
+    code: str,
+    solution_file: str,
+    test_output: str | None = None,
+    dataset_dir: Path | str | None = None,
+) -> dict:
     """Inline perf measurement for a passing iter. Returns dict to attach to record.
     Always returns a dict with either runtime numbers or a 'skipped' reason —
     never raises. GPU selection is inherited via parent shell CUDA_VISIBLE_DEVICES.
@@ -231,7 +350,7 @@ def _measure_iter_perf(task_id: str, code: str, solution_file: str, test_output:
     """
     import math
     try:
-        ref = _bench_load_reference(task_id)
+        ref = _bench_load_reference(task_id, dataset_root=dataset_dir)
     except FileNotFoundError:
         # applied-kernels-aware fallback: parse Speedup: lines from applied-kernels ./test output
         if test_output:
@@ -250,14 +369,14 @@ def _measure_iter_perf(task_id: str, code: str, solution_file: str, test_output:
                     "n_trials": None,
                 }
         return {"skipped": "reference_not_defined"}
-    ref_entry = _bench_cache_lookup(ref)
+    ref_entry = _bench_cache_lookup(ref, dataset_root=dataset_dir)
     if ref_entry is None:
         return {"skipped": "reference_not_cached"}
     if ref_entry.skipped:
         return {"skipped": ref_entry.skipped}
     files = [{"path": solution_file, "content": code}]
     try:
-        cand = _bench_run_candidate(task_id, files, gpu_id=0)
+        cand = _bench_run_candidate(task_id, files, gpu_id=0, dataset_root=dataset_dir)
     except Exception as e:
         return {"skipped": "build_failed_on_perf", "error": str(e)[:200]}
     if "skipped" in cand.timing:
@@ -314,13 +433,21 @@ def run_task(
     mode = "debug" if broken_start else "generation"
     logger.info(f"=== Starting task: {task_stem}  (mode={mode}, method={method}) ===")
 
-    # Load task metadata
-    input_meta = json.loads(
-        (dataset_dir / "input" / f"{task_stem}.json").read_text(encoding="utf-8")
-    )
-    prompt_text = (dataset_dir / "prompts" / f"{task_stem}.txt").read_text(
-        encoding="utf-8"
-    )
+    if method == "agent":
+        from .agent_loop import run_task_agent
+
+        return run_task_agent(
+            task_stem,
+            dataset_dir,
+            output_dir,
+            config,
+            client,
+            broken_start=broken_start,
+        )
+
+    # Load task metadata from either legacy flat datasets or benchmark/task_list.json.
+    input_meta = load_input_meta(task_stem, dataset_dir)
+    prompt_text = load_prompt_text(task_stem, dataset_dir)
 
     max_iters = config["experiment"]["max_iterations"]
     workdir = Path(config["build"]["workdir"])
@@ -348,6 +475,7 @@ def run_task(
             broken_code=broken_code,
             error_category=broken_start.get("error_category", "unknown"),
             error_excerpt=excerpt_section,
+            performance_requirement=_performance_requirement_section(performance_gate),
         )
         system_msg = _get_system_prompt(input_meta) + _few_shot_section(
             config, broken_start, task_stem
@@ -363,7 +491,9 @@ def run_task(
         messages = [
             {"role": "system", "content": system_msg},
             {"role": "user", "content": FIRST_TURN_TEMPLATE.format(
-                prompt=prompt_text, solution_file=solution_file,
+                prompt=prompt_text,
+                solution_file=solution_file,
+                performance_requirement=_performance_requirement_section(performance_gate),
             )},
         ]
 
@@ -484,28 +614,82 @@ def run_task(
             f"(build_ok={build_ok})"
         )
 
-        # --- Check if passed ---
-        if classification["five_category"] == "passed":
-            logger.info(f"  PASSED at {loop_label.lower()} {iteration}!")
-            # Inline perf: measured every time a candidate passes.
-            perf = _measure_iter_perf(record["task_id"], code, solution_file, test_output=test_output)
-            record["performance"] = perf
-            if "speedup" in perf:
-                # applied-kernels path returns geomean speedup only (no per-trial cand/ref ms).
-                cand = perf.get("candidate_runtime_ms")
-                ref = perf.get("reference_runtime_ms")
-                if cand is not None and ref is not None:
-                    logger.info(
-                        f"  PERF: speedup={perf['speedup']:.2f}x "
-                        f"cand={cand:.3f}ms ref={ref:.3f}ms"
-                    )
-                else:
-                    method_tag = perf.get("timing_method", "?")
-                    logger.info(f"  PERF: speedup={perf['speedup']:.2f}x ({method_tag})")
+        # --- Check if correctness passed, then enforce reference perf gate if needed ---
+        correctness_passed = (
+            classification["five_category"] == "passed"
+            or _needs_reference_perf_measurement(classification)
+        )
+        if correctness_passed:
+            if _needs_reference_perf_measurement(classification):
+                logger.info(
+                    f"  Correctness passed at {loop_label.lower()} {iteration}; "
+                    "stdout speedup missing, measuring reference perf"
+                )
             else:
-                logger.info(f"  PERF skipped: {perf.get('skipped')}")
-            # Iterative stops on first pass; repeated continues to fill pass@k.
-            if method == "iterative":
+                logger.info(f"  Correctness passed at {loop_label.lower()} {iteration}")
+
+            stdout_gate = _has_stdout_perf_gate(classification)
+            if _measure_pass_performance_enabled(config) and not (
+                performance_gate is not None and stdout_gate
+            ):
+                # Inline perf: measured every time a candidate passes.
+                perf = _measure_iter_perf(
+                    input_meta.get("task_id", task_stem),
+                    code,
+                    solution_file,
+                    test_output=test_output,
+                    dataset_dir=dataset_dir,
+                )
+                record["performance"] = perf
+                if "speedup" in perf:
+                    # applied-kernels path returns geomean speedup only (no per-trial cand/ref ms).
+                    cand = perf.get("candidate_runtime_ms")
+                    ref = perf.get("reference_runtime_ms")
+                    if cand is not None and ref is not None:
+                        logger.info(
+                            f"  PERF: speedup={perf['speedup']:.2f}x "
+                            f"cand={cand:.3f}ms ref={ref:.3f}ms"
+                        )
+                    else:
+                        method_tag = perf.get("timing_method", "?")
+                        logger.info(f"  PERF: speedup={perf['speedup']:.2f}x ({method_tag})")
+                else:
+                    logger.info(f"  PERF skipped: {perf.get('skipped')}")
+                if performance_gate is not None:
+                    perf_gate = _evaluate_performance_gate(perf, performance_gate)
+                    record["performance_gate"] = perf_gate
+                    if not perf_gate.get("passed", True):
+                        classification = _classification_from_perf_gate(perf, perf_gate)
+                        record.update(classification)
+                        record["final_solution_status"] = "FAILED_TEST"
+                        if "speedup" in perf_gate:
+                            logger.info(
+                                f"  PERF GATE failed: speedup={perf_gate['speedup']:.2f}x "
+                                f"< {perf_gate['min_speedup']:.2f}x"
+                            )
+                        else:
+                            logger.info(
+                                f"  PERF GATE failed: {perf_gate.get('reason')}"
+                            )
+                    else:
+                        classification = _classification_passed_from_perf_gate(perf_gate)
+                        record.update(classification)
+                        record["final_solution_status"] = "PASSED"
+                        logger.info(
+                            f"  PERF GATE passed: >= {perf_gate['min_speedup']:.2f}x"
+                        )
+            elif performance_gate is not None and stdout_gate:
+                gate = classification.get("performance_gate") or {}
+                logger.info(
+                    f"  PERF GATE passed from test output: "
+                    f"speedup={gate.get('speedup'):.2f}x >= {gate.get('min_speedup'):.2f}x"
+                )
+            else:
+                logger.info("  PERF skipped: disabled by experiment.measure_perf_on_pass=false")
+            # Iterative stops only after correctness and any enabled perf gate pass.
+            if classification["five_category"] == "passed":
+                logger.info(f"  PASSED at {loop_label.lower()} {iteration}!")
+            if method == "iterative" and classification["five_category"] == "passed":
                 stop_reason = "passed"
                 break
 
@@ -590,10 +774,10 @@ def _make_record(
     performance_gate: dict | None = None,
     code_hash: str | None = None,
 ) -> dict:
-    task_id = input_meta.get("task_id", task_stem.replace("_", "/", 1))
+    source_task_id = input_meta.get("task_id")
     record = {
         "sample_id": sample_id,
-        "task_id": task_id,
+        "task_id": task_stem,
         "iteration": iteration,
         "status": status,
         "five_category": five_category,
@@ -610,6 +794,8 @@ def _make_record(
             "build_log_raw": f"build_log_raw/{sample_id}.txt",
         },
     }
+    if source_task_id and source_task_id != task_stem:
+        record["source_task_id"] = source_task_id
     if logic_error_category:
         record["logic_error_category"] = logic_error_category
     if logic_error_detail:
@@ -864,15 +1050,12 @@ def main():
     v2_broken_starts: dict[str, dict] = {}
     if args.mode == "debug":
         v2_path = Path(args.v2_task_list) if args.v2_task_list else (
-            Path(__file__).resolve().parent.parent / "v2_task_list.json"
+            Path(__file__).resolve().parent.parent / "benchmark" / "task_list.json"
         )
         if not v2_path.exists():
             logger.error(f"--mode debug requires v2_task_list.json (looked at {v2_path})")
             sys.exit(1)
-        v2_data = json.loads(v2_path.read_text())
-        for e in v2_data["entries"]:
-            if e.get("broken_start"):
-                v2_broken_starts[e["stem"]] = e["broken_start"]
+        v2_broken_starts = broken_start_map(v2_path)
         logger.info(f"v2 debug mode: loaded {len(v2_broken_starts)} broken_start entries")
 
     config = load_config(args.config)
@@ -914,9 +1097,21 @@ def main():
     elif config["experiment"]["tasks"]:
         task_stems = config["experiment"]["tasks"]
     else:
-        task_stems = sorted(
-            p.stem for p in (dataset_dir / "input").glob("*.json")
-        )
+        task_stems = discover_task_stems(dataset_dir, args.v2_task_list)
+
+    error_category_filter = (
+        config.get("experiment", {}).get("error_category")
+        or config.get("experiment", {}).get("task_error_category")
+    )
+    if error_category_filter:
+        if isinstance(error_category_filter, str):
+            wanted_categories = {error_category_filter}
+        else:
+            wanted_categories = set(error_category_filter)
+        task_stems = [
+            stem for stem in task_stems
+            if task_error_category(stem, dataset_dir) in wanted_categories
+        ]
 
     # Pre-flight checks (GPU compat, API key, dataset, disk)
     from .preflight import run_preflight

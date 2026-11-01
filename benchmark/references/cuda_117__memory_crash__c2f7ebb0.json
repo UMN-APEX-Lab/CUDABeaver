@@ -1,24 +1,19 @@
 {
- "task_id": "cuda_117__memory_crash__c2f7ebb0",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "// file: solution.cu\n#include \"k_nearest_neighbors.h\"\n#include <float.h>\n\n__global__ void k_nearestNeighbors(const float* inputVectorA_d, int nA, float* inputVectorB_d, int nB, int* nearestNeighborIndex) {\n    // Since the inputVectorB will be repeatedly accessed by inputVectorA, copying the inputVectorB into shared memory will reduce memory latency\n    // Allocating dynamic sized shared memory\n    extern __shared__ float sharedVectorB[];\n\n    // Threads copy inputVectorB into shared memory. \n    size_t sharedIdx = threadIdx.x;\n    while (sharedIdx < N_DIMS * nB) {\n        sharedVectorB[sharedIdx] = inputVectorB_d[sharedIdx];\n        sharedIdx += blockDim.x;\n    }\n    __syncthreads();\n\n    // Distance computation from a point in inputVectorA to every point in inputVectorB\n    for (int tIdx = blockIdx.x * blockDim.x + threadIdx.x; tIdx < nB; tIdx += gridDim.x * blockDim.x) {\n        // Input Vector\n        float ptA[N_DIMS];\n        for (int nd = 0; nd < N_DIMS; nd++) {\n            ptA[nd] = inputVectorA_d[N_DIMS * tIdx + nd];\n        }\n        \n        // Setting distance value to MAX and index to zero\n        float minDist = FLT_MAX;\n        size_t minDistIdx = 0;\n        for (int i = 0; i < nB; i++) {\n            // Computing distance from inputVectorA to all N-D points in inputVectorB\n            float sqDist = 0;\n            for (int nd = 0; nd < N_DIMS; nd++) {\n                float dist = ptA[nd] - sharedVectorB[N_DIMS * i + nd];\n                sqDist += (dist * dist);\n            }\n            \n            // Finding minimum distance and capturing their indices.\n            if ((fabs(sqDist - minDist) > FLT_EPSILON) && (sqDist < minDist)) {\n                minDist = sqDist;\n                minDistIdx = i;\n            }\n        }\n\n        // Storing the outputs\n        nearestNeighborIndex[tIdx] = minDistIdx;\n    }\n}\n"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_117__memory_crash__c2f7ebb0",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "// file: solution.cu\n#include \"k_nearest_neighbors.h\"\n#include <float.h>\n\n__global__ void k_nearestNeighbors(const float* inputVectorA_d, int nA, float* inputVectorB_d, int nB, int* nearestNeighborIndex) {\n    // Since the inputVectorB will be repeatedly accessed by inputVectorA, copying the inputVectorB into shared memory will reduce memory latency\n    // Allocating dynamic sized shared memory\n    extern __shared__ float sharedVectorB[];\n\n    // Threads copy inputVectorB into shared memory. \n    size_t sharedIdx = threadIdx.x;\n    while (sharedIdx < N_DIMS * nB) {\n        sharedVectorB[sharedIdx] = inputVectorB_d[sharedIdx];\n        sharedIdx += blockDim.x;\n    }\n    __syncthreads();\n\n    // Distance computation from a point in inputVectorA to every point in inputVectorB\n    for (int tIdx = blockIdx.x * blockDim.x + threadIdx.x; tIdx < nB; tIdx += gridDim.x * blockDim.x) {\n        // Input Vector\n        float ptA[N_DIMS];\n        for (int nd = 0; nd < N_DIMS; nd++) {\n            ptA[nd] = inputVectorA_d[N_DIMS * tIdx + nd];\n        }\n        \n        // Setting distance value to MAX and index to zero\n        float minDist = FLT_MAX;\n        size_t minDistIdx = 0;\n        for (int i = 0; i < nB; i++) {\n            // Computing distance from inputVectorA to all N-D points in inputVectorB\n            float sqDist = 0;\n            for (int nd = 0; nd < N_DIMS; nd++) {\n                float dist = ptA[nd] - sharedVectorB[N_DIMS * i + nd];\n                sqDist += (dist * dist);\n            }\n            \n            // Finding minimum distance and capturing their indices.\n            if ((fabs(sqDist - minDist) > FLT_EPSILON) && (sqDist < minDist)) {\n                minDist = sqDist;\n                minDistIdx = i;\n            }\n        }\n\n        // Storing the outputs\n        nearestNeighborIndex[tIdx] = minDistIdx;\n    }\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
 }

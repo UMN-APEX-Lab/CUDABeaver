@@ -321,7 +321,7 @@ def main() -> int:
           bold="none", caption="Exp 1: iter base (multi-metric)",
           footnote=_coverage_footnote(master, "iter"))
     _emit("exp2_repeated_vs_iter", _build_exp2_repeated_vs_iter(master),
-          bold="none", caption="Exp 2: repeated@5 vs iter@k",
+          bold="none", caption="Exp 2: pass@5 vs iter@k",
           footnote=_coverage_footnote(master, "repeated"))
     _emit("exp3_feedback", _pivot_pass_at_k(master, "feedback"),
           bold="row_max", caption="Exp 3: feedback ablation (pass@k)",

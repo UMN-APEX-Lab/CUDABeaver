@@ -17,7 +17,7 @@
 # Note: 46 of the 200 broken_starts were originally sampled from GPT-5.4
 # itself (source_origin in task_list.json). User-approved tradeoff
 # (2026-04-27): keep them in to maximise cross-model comparability of
-# repeated@5; downstream analysis flags these 46 task_ids and reports
+# pass@5; downstream analysis flags these 46 task_ids and reports
 # "GPT5.4 self-source caveat" on any cross-model table that includes
 # them. See EXPERIMENTS_OVERVIEW.md §0.2.
 api:

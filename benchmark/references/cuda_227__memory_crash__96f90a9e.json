@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_227__memory_crash__96f90a9e",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "// file: solution.cu\n#include \"k_sortSegments.h\"\n#include <cfloat>\n#include <cmath>\n\n__global__ void k_sortSegments(float *array_d, float *arrayOut_d, int segmentSize, int arraySize) {\n    unsigned int activeWarpLanesMask = __activemask();\n    unsigned int numActiveWarpLanes = __popc(activeWarpLanesMask);\n    constexpr float ERROR_TOLERANCE = 1e-9f;\n    int blockSize = blockDim.x;\n    int localThreadIndex = threadIdx.x;\n    int warpLane = localThreadIndex % warpSize;\n    int numWarpsPerBlock = (blockSize + warpSize - 1) / warpSize;\n    int warpIndex = blockIdx.x * numWarpsPerBlock + localThreadIndex / warpSize;\n    int numTotalWarpsActive = numWarpsPerBlock * gridDim.x;\n    int numWarpsRequired = arraySize/segmentSize;\n    int warpStrideIterations = (segmentSize + numActiveWarpLanes - 1) / numActiveWarpLanes;\n    int gridStrideIterations = (numWarpsRequired + numTotalWarpsActive - 1) / numTotalWarpsActive;\n    // Grid stride loops enable flexibility with computable array sizes.\n    for(int gridIteration = 0; gridIteration < gridStrideIterations; gridIteration++) {\n        int gridOffset = segmentSize * (gridIteration * numTotalWarpsActive + warpIndex);\n        // Iterating the data for the left side of comparisons.\n        for(int warpIteration1 = 0; warpIteration1 < warpStrideIterations; warpIteration1++) {\n            int data1Index = warpIteration1 * numActiveWarpLanes + warpLane;\n            float data1 = FLT_MAX;\n            bool isData1Valid = (data1Index < segmentSize) && (gridOffset + data1Index < arraySize);\n            int rank = 0;\n            if(isData1Valid) {\n                data1 = array_d[gridOffset + data1Index];\n            }\n            // Iterating the data for the right side of comparisons.\n            for(int warpIteration2 = 0; warpIteration2 < warpStrideIterations; warpIteration2++) {\n                int data2Index = warpIteration2 * numActiveWarpLanes + warpLane;\n                int numElementsToCompare = segmentSize - warpIteration2 * numActiveWarpLanes;\n                numElementsToCompare = (numElementsToCompare < numActiveWarpLanes ? numElementsToCompare : numActiveWarpLanes);\n                float data2 = FLT_MAX;\n                if(data2Index < segmentSize && gridOffset + data2Index < arraySize) {\n                    data2 = array_d[gridOffset + data2Index];\n                }\n                // Iterating all comparisons using warp-shuffle.\n                for(int i = 0; i < numElementsToCompare; i++) {\n                    float comparedData = __shfl_sync(activeWarpLanesMask, data2, i);\n                    bool case1 = comparedData < data1;\n                    bool case2 = fabsf(comparedData - data1) < ERROR_TOLERANCE;\n                    bool case3 = data1Index > (warpIteration2 * numActiveWarpLanes + i);\n                    rank += ((case1 || (case2 && case3)) ? 1 : 0);\n                }\n            }\n            if(isData1Valid && gridOffset + rank < arraySize) {\n                arrayOut_d[gridOffset + rank] = data1;\n            }\n        }\n    }\n}\n"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_227__memory_crash__96f90a9e",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"k_sortSegments.h\"\n#include <cfloat>\n#include <cmath>\n\n__global__ void k_sortSegments(float *array_d, float *arrayOut_d, int segmentSize, int arraySize) {\n    unsigned int activeWarpLanesMask = __activemask();\n    unsigned int numActiveWarpLanes = __popc(activeWarpLanesMask);\n    constexpr float ERROR_TOLERANCE = 1e-9f;\n    int blockSize = blockDim.x;\n    int localThreadIndex = threadIdx.x;\n    int warpLane = localThreadIndex % warpSize;\n    int numWarpsPerBlock = (blockSize + warpSize - 1) / warpSize;\n    int warpIndex = blockIdx.x * numWarpsPerBlock + localThreadIndex / warpSize;\n    int numTotalWarpsActive = numWarpsPerBlock * gridDim.x;\n    int numWarpsRequired = arraySize/segmentSize;\n    int warpStrideIterations = (segmentSize + numActiveWarpLanes - 1) / numActiveWarpLanes;\n    int gridStrideIterations = (numWarpsRequired + numTotalWarpsActive - 1) / numTotalWarpsActive;\n    // Grid stride loops enable flexibility with computable array sizes.\n    for(int gridIteration = 0; gridIteration < gridStrideIterations; gridIteration++) {\n        int gridOffset = segmentSize * (gridIteration * numTotalWarpsActive + warpIndex);\n        // Iterating the data for the left side of comparisons.\n        for(int warpIteration1 = 0; warpIteration1 < warpStrideIterations; warpIteration1++) {\n            int data1Index = warpIteration1 * numActiveWarpLanes + warpLane;\n            float data1 = FLT_MAX;\n            bool isData1Valid = (data1Index < segmentSize) && (gridOffset + data1Index < arraySize);\n            int rank = 0;\n            if(isData1Valid) {\n                data1 = array_d[gridOffset + data1Index];\n            }\n            // Iterating the data for the right side of comparisons.\n            for(int warpIteration2 = 0; warpIteration2 < warpStrideIterations; warpIteration2++) {\n                int data2Index = warpIteration2 * numActiveWarpLanes + warpLane;\n                int numElementsToCompare = segmentSize - warpIteration2 * numActiveWarpLanes;\n                numElementsToCompare = (numElementsToCompare < numActiveWarpLanes ? numElementsToCompare : numActiveWarpLanes);\n                float data2 = FLT_MAX;\n                if(data2Index < segmentSize && gridOffset + data2Index < arraySize) {\n                    data2 = array_d[gridOffset + data2Index];\n                }\n                // Iterating all comparisons using warp-shuffle.\n                for(int i = 0; i < numElementsToCompare; i++) {\n                    float comparedData = __shfl_sync(activeWarpLanesMask, data2, i);\n                    bool case1 = comparedData < data1;\n                    bool case2 = fabsf(comparedData - data1) < ERROR_TOLERANCE;\n                    bool case3 = data1Index > (warpIteration2 * numActiveWarpLanes + i);\n                    rank += ((case1 || (case2 && case3)) ? 1 : 0);\n                }\n            }\n            if(isData1Valid && gridOffset + rank < arraySize) {\n                arrayOut_d[gridOffset + rank] = data1;\n            }\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

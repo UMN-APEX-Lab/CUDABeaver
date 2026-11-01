@@ -1,24 +1,18 @@
 {
- "task_id": "cusolver_28__compile_error__0246128d",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"trtri.h\"\n#include \"cuda_helpers.h\"\n#include <stdexcept>\n\nvoid trtri(int n, std::vector<double> &A, cublasFillMode_t uplo,\n           cublasDiagType_t diag) {\n  cusolverDnHandle_t handle = NULL;\n  cudaStream_t stream = NULL;\n\n  double *d_A = nullptr;\n  int *d_info = nullptr;\n  int h_info = 0;\n  void *d_work = nullptr;\n  size_t workspaceInBytesOnDevice = 0;\n  void *h_work = nullptr;\n  size_t workspaceInBytesOnHost = 0;\n  const int lda = n;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&handle));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(handle, stream));\n\n  CUDA_CHECK(cudaMalloc(&d_A, sizeof(double) * A.size()));\n  CUDA_CHECK(cudaMalloc(&d_info, sizeof(int)));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(double) * A.size(),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnXtrtri_bufferSize(\n      handle, uplo, diag, n, CUDA_R_64F, d_A, lda, &workspaceInBytesOnDevice,\n      &workspaceInBytesOnHost));\n\n  CUDA_CHECK(cudaMalloc(&d_work, workspaceInBytesOnDevice));\n  if (workspaceInBytesOnHost > 0) {\n    h_work = malloc(workspaceInBytesOnHost);\n    if (h_work == nullptr) {\n      throw std::runtime_error(\"Host memory allocation failed.\");\n    }\n  }\n\n  CUSOLVER_CHECK(cusolverDnXtrtri(handle, uplo, diag, n, CUDA_R_64F, d_A, lda,\n                                  d_work, workspaceInBytesOnDevice, h_work,\n                                  workspaceInBytesOnHost, d_info));\n\n  CUDA_CHECK(cudaMemcpyAsync(&h_info, d_info, sizeof(int),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(A.data(), d_A, sizeof(double) * A.size(),\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  if (h_info != 0) {\n    throw std::runtime_error(\"Matrix inversion failed with info = \" +\n                             std::to_string(h_info));\n  }\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n  free(h_work);\n\n  CUSOLVER_CHECK(cusolverDnDestroy(handle));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cusolver_28__compile_error__0246128d",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"trtri.h\"\n#include \"cuda_helpers.h\"\n#include <stdexcept>\n\nvoid trtri(int n, std::vector<double> &A, cublasFillMode_t uplo,\n           cublasDiagType_t diag) {\n  cusolverDnHandle_t handle = NULL;\n  cudaStream_t stream = NULL;\n\n  double *d_A = nullptr;\n  int *d_info = nullptr;\n  int h_info = 0;\n  void *d_work = nullptr;\n  size_t workspaceInBytesOnDevice = 0;\n  void *h_work = nullptr;\n  size_t workspaceInBytesOnHost = 0;\n  const int lda = n;\n\n  CUSOLVER_CHECK(cusolverDnCreate(&handle));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUSOLVER_CHECK(cusolverDnSetStream(handle, stream));\n\n  CUDA_CHECK(cudaMalloc(&d_A, sizeof(double) * A.size()));\n  CUDA_CHECK(cudaMalloc(&d_info, sizeof(int)));\n\n  CUDA_CHECK(cudaMemcpyAsync(d_A, A.data(), sizeof(double) * A.size(),\n                             cudaMemcpyHostToDevice, stream));\n\n  CUSOLVER_CHECK(cusolverDnXtrtri_bufferSize(\n      handle, uplo, diag, n, CUDA_R_64F, d_A, lda, &workspaceInBytesOnDevice,\n      &workspaceInBytesOnHost));\n\n  CUDA_CHECK(cudaMalloc(&d_work, workspaceInBytesOnDevice));\n  if (workspaceInBytesOnHost > 0) {\n    h_work = malloc(workspaceInBytesOnHost);\n    if (h_work == nullptr) {\n      throw std::runtime_error(\"Host memory allocation failed.\");\n    }\n  }\n\n  CUSOLVER_CHECK(cusolverDnXtrtri(handle, uplo, diag, n, CUDA_R_64F, d_A, lda,\n                                  d_work, workspaceInBytesOnDevice, h_work,\n                                  workspaceInBytesOnHost, d_info));\n\n  CUDA_CHECK(cudaMemcpyAsync(&h_info, d_info, sizeof(int),\n                             cudaMemcpyDeviceToHost, stream));\n  CUDA_CHECK(cudaMemcpyAsync(A.data(), d_A, sizeof(double) * A.size(),\n                             cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  if (h_info != 0) {\n    throw std::runtime_error(\"Matrix inversion failed with info = \" +\n                             std::to_string(h_info));\n  }\n\n  CUDA_CHECK(cudaFree(d_A));\n  CUDA_CHECK(cudaFree(d_info));\n  CUDA_CHECK(cudaFree(d_work));\n  free(h_work);\n\n  CUSOLVER_CHECK(cusolverDnDestroy(handle));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

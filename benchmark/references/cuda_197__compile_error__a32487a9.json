@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_197__compile_error__a32487a9",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"kernel_contract.h\"\n\n__global__ void k_compactElementsOfSegmentsWithThreshold(int numSegments, float* array_d, float threshold, float defaultValue) {\n    constexpr unsigned int ALL_LANES_REQUIRE_COMPACTION = 0xFFFFFFFF;\n    constexpr unsigned int ALL_LANES_VOTE = 0xFFFFFFFF;\n    int numTotalThreads = blockDim.x * gridDim.x;\n    int numTotalWarps = numTotalThreads / warpSize;\n    int localThreadIndex = threadIdx.x;\n    int threadIndex = localThreadIndex + blockIdx.x * blockDim.x;\n    int localWarpIndex = localThreadIndex / warpSize;\n    int localSegmentOffset = localWarpIndex * SEGMENT_SIZE;\n    int warpIndex = threadIndex / warpSize;\n    int warpLane = threadIdx.x % warpSize;\n    int numStepsForGridStride = (numSegments + numTotalWarps - 1) / numTotalWarps;\n    int arrayBorder = numSegments * SEGMENT_SIZE;\n    unsigned int currentWarpLaneMask = 1 << warpLane;\n    // Calculating the mask to find the number of elements before the current warp lane that have an output.\n    unsigned int maskForCount = currentWarpLaneMask - 1;\n    extern __shared__ float s_output[];\n    for (int i = 0; i < numStepsForGridStride; i++) {\n        // Clearing the output buffer.\n        s_output[localThreadIndex] = defaultValue;\n        __syncwarp();\n        int segmentIndex = i * numTotalWarps + warpIndex;\n        int segmentOffset = SEGMENT_SIZE * segmentIndex;\n        int globalElementIndex = segmentOffset + warpLane;\n        float data = globalElementIndex < arrayBorder ? array_d[globalElementIndex] : defaultValue;\n        int predicate = data > threshold;\n        // Identifying which warp lanes have an output.\n        unsigned int predicateMask = __ballot_sync(ALL_LANES_VOTE, predicate);\n        if (predicateMask != ALL_LANES_REQUIRE_COMPACTION) {\n            // Calculating the number of elements to compact before the current warp lane. This number is used as the offset within the current segment output.\n            unsigned int offset = __popc(predicateMask & maskForCount);\n            // Scattering the results to the shared memory output using the offset.\n            if (predicate) {\n                s_output[localSegmentOffset + offset] = data;\n            }\n            __syncwarp();\n            // Uniformly writing the output from shared memory to global memory.\n            if (globalElementIndex < arrayBorder) {\n                array_d[globalElementIndex] = s_output[localThreadIndex];\n            }\n        }\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_197__compile_error__a32487a9",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"kernel_contract.h\"\n\n__global__ void k_compactElementsOfSegmentsWithThreshold(int numSegments, float* array_d, float threshold, float defaultValue) {\n    constexpr unsigned int ALL_LANES_REQUIRE_COMPACTION = 0xFFFFFFFF;\n    constexpr unsigned int ALL_LANES_VOTE = 0xFFFFFFFF;\n    int numTotalThreads = blockDim.x * gridDim.x;\n    int numTotalWarps = numTotalThreads / warpSize;\n    int localThreadIndex = threadIdx.x;\n    int threadIndex = localThreadIndex + blockIdx.x * blockDim.x;\n    int localWarpIndex = localThreadIndex / warpSize;\n    int localSegmentOffset = localWarpIndex * SEGMENT_SIZE;\n    int warpIndex = threadIndex / warpSize;\n    int warpLane = threadIdx.x % warpSize;\n    int numStepsForGridStride = (numSegments + numTotalWarps - 1) / numTotalWarps;\n    int arrayBorder = numSegments * SEGMENT_SIZE;\n    unsigned int currentWarpLaneMask = 1 << warpLane;\n    // Calculating the mask to find the number of elements before the current warp lane that have an output.\n    unsigned int maskForCount = currentWarpLaneMask - 1;\n    extern __shared__ float s_output[];\n    for (int i = 0; i < numStepsForGridStride; i++) {\n        // Clearing the output buffer.\n        s_output[localThreadIndex] = defaultValue;\n        __syncwarp();\n        int segmentIndex = i * numTotalWarps + warpIndex;\n        int segmentOffset = SEGMENT_SIZE * segmentIndex;\n        int globalElementIndex = segmentOffset + warpLane;\n        float data = globalElementIndex < arrayBorder ? array_d[globalElementIndex] : defaultValue;\n        int predicate = data > threshold;\n        // Identifying which warp lanes have an output.\n        unsigned int predicateMask = __ballot_sync(ALL_LANES_VOTE, predicate);\n        if (predicateMask != ALL_LANES_REQUIRE_COMPACTION) {\n            // Calculating the number of elements to compact before the current warp lane. This number is used as the offset within the current segment output.\n            unsigned int offset = __popc(predicateMask & maskForCount);\n            // Scattering the results to the shared memory output using the offset.\n            if (predicate) {\n                s_output[localSegmentOffset + offset] = data;\n            }\n            __syncwarp();\n            // Uniformly writing the output from shared memory to global memory.\n            if (globalElementIndex < arrayBorder) {\n                array_d[globalElementIndex] = s_output[localThreadIndex];\n            }\n        }\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

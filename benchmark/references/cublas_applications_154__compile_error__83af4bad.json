@@ -1,24 +1,18 @@
 {
- "task_id": "cublas_applications_154__compile_error__83af4bad",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"conjugate_gradient.h\"\n#include <cmath>\n\nvoid k_conjugateGradientKernel(cublasHandle_t cublasHandle, int matrixSize, double* residual_d, double* matrixA_d, double* searchDir_d, double* vectorX_d, double* productAdir_d) {\n    int iterator = 0;\n    double oldResidual, newResidual, alpha, beta;\n\n    // Compute oldResidual = residualVector^T * residualVector\n    CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, residual_d, 1, residual_d, 1, &oldResidual));\n\n    while (iterator < MAX_ITERATIONS) {\n        // productAdir = matrixA * searchDirection\n        double alphaCublas = 1.0;\n        double betaCublas = 0.0;\n        CUBLAS_CHECK(cublasDgemv(cublasHandle, CUBLAS_OP_N, matrixSize, matrixSize,\n                    &alphaCublas, matrixA_d, matrixSize,\n                    searchDir_d, 1,\n                    &betaCublas, productAdir_d, 1));\n\n        // Compute alpha = oldResidual / (searchDirection^T * productAdir)\n        double pAp;\n        CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, searchDir_d, 1, productAdir_d, 1, &pAp));\n        if (pAp == 0.0)\n        {\n            break; // Encountered zero denominator in alpha computation.\n        }\n        alpha = oldResidual / pAp;\n\n        // Update vectorX = vectorX + alpha * searchDirection\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &alpha, searchDir_d, 1, vectorX_d, 1));\n\n        // Update residualVector = residualVector - alpha * productAdir\n        double negAlpha = -1.0 * alpha;\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &negAlpha, productAdir_d, 1, residual_d, 1));\n\n        // Compute newResidual = residualVector^T * residualVector\n        CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, residual_d, 1, residual_d, 1, &newResidual));\n\n        // Check for convergence\n        if (std::sqrt(newResidual) < TOLERANCE) {\n            break;\n        }\n\n        // Compute beta = newResidual / oldResidual\n        beta = newResidual / oldResidual;\n\n        // Update searchDirection = residualVector + beta * searchDirection\n        CUBLAS_CHECK(cublasDscal(cublasHandle, matrixSize, &beta, searchDir_d, 1));                       // searchDirection = beta * searchDirection\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &alphaCublas, residual_d, 1, searchDir_d, 1)); // searchDirection = searchDirection + residualVector\n\n        // Update oldResidual for next iteration\n        oldResidual = newResidual;\n        iterator++;\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cublas_applications_154__compile_error__83af4bad",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"conjugate_gradient.h\"\n#include <cmath>\n\nvoid k_conjugateGradientKernel(cublasHandle_t cublasHandle, int matrixSize, double* residual_d, double* matrixA_d, double* searchDir_d, double* vectorX_d, double* productAdir_d) {\n    int iterator = 0;\n    double oldResidual, newResidual, alpha, beta;\n\n    // Compute oldResidual = residualVector^T * residualVector\n    CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, residual_d, 1, residual_d, 1, &oldResidual));\n\n    while (iterator < MAX_ITERATIONS) {\n        // productAdir = matrixA * searchDirection\n        double alphaCublas = 1.0;\n        double betaCublas = 0.0;\n        CUBLAS_CHECK(cublasDgemv(cublasHandle, CUBLAS_OP_N, matrixSize, matrixSize,\n                    &alphaCublas, matrixA_d, matrixSize,\n                    searchDir_d, 1,\n                    &betaCublas, productAdir_d, 1));\n\n        // Compute alpha = oldResidual / (searchDirection^T * productAdir)\n        double pAp;\n        CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, searchDir_d, 1, productAdir_d, 1, &pAp));\n        if (pAp == 0.0)\n        {\n            break; // Encountered zero denominator in alpha computation.\n        }\n        alpha = oldResidual / pAp;\n\n        // Update vectorX = vectorX + alpha * searchDirection\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &alpha, searchDir_d, 1, vectorX_d, 1));\n\n        // Update residualVector = residualVector - alpha * productAdir\n        double negAlpha = -1.0 * alpha;\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &negAlpha, productAdir_d, 1, residual_d, 1));\n\n        // Compute newResidual = residualVector^T * residualVector\n        CUBLAS_CHECK(cublasDdot(cublasHandle, matrixSize, residual_d, 1, residual_d, 1, &newResidual));\n\n        // Check for convergence\n        if (std::sqrt(newResidual) < TOLERANCE) {\n            break;\n        }\n\n        // Compute beta = newResidual / oldResidual\n        beta = newResidual / oldResidual;\n\n        // Update searchDirection = residualVector + beta * searchDirection\n        CUBLAS_CHECK(cublasDscal(cublasHandle, matrixSize, &beta, searchDir_d, 1));                       // searchDirection = beta * searchDirection\n        CUBLAS_CHECK(cublasDaxpy(cublasHandle, matrixSize, &alphaCublas, residual_d, 1, searchDir_d, 1)); // searchDirection = searchDirection + residualVector\n\n        // Update oldResidual for next iteration\n        oldResidual = newResidual;\n        iterator++;\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

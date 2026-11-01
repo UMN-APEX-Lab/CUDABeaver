@@ -9,6 +9,11 @@ signatures). We collect those code blocks and write them out as the header.
 import re
 from pathlib import Path
 
+try:
+    from .task_registry import resolve_task_paths
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from task_registry import resolve_task_paths
+
 
 def extract_header_info(prompt_text: str) -> tuple[str | None, str]:
     """
@@ -698,15 +703,17 @@ def setup_include_dir(task_stem: str, dataset_dir: Path, task_workdir: Path) -> 
     """
     Create include/ (and helper/) in task_workdir and write all needed support files.
     """
+    task_paths = resolve_task_paths(task_stem, dataset_dir)
+
     # Read build command to know which libraries are linked
-    input_path = dataset_dir / "input" / f"{task_stem}.json"
+    input_path = task_paths.input_path
     build_cmd = ""
     if input_path.exists():
         import json as _json
         build_cmd = _json.loads(input_path.read_text())["build_command"]
 
     # 1. Auto-generated header from prompt; append library check macros if needed
-    prompt_path = dataset_dir / "prompts" / f"{task_stem}.txt"
+    prompt_path = task_paths.prompt_path
     if prompt_path.exists():
         prompt_text = prompt_path.read_text(encoding="utf-8")
         header_name, header_content = extract_header_info(prompt_text)

@@ -1,24 +1,18 @@
 {
- "task_id": "cusparse_4__compile_error__cfcd99f6",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"gather.h\"\n#include \"cuda_helpers.h\"\n\nvoid gather(int size, int nnz, const std::vector<int> &hX_indices,\n            const std::vector<float> &hY, std::vector<float> &hX_values) {\n  int *dX_indices = nullptr;\n  float *dY = nullptr, *dX_values = nullptr;\n  CHECK_CUDA(cudaMalloc((void **)&dX_indices, nnz * sizeof(int)));\n  CHECK_CUDA(cudaMalloc((void **)&dX_values, nnz * sizeof(float)));\n  CHECK_CUDA(cudaMalloc((void **)&dY, size * sizeof(float)));\n\n  CHECK_CUDA(cudaMemcpy(dX_indices, hX_indices.data(), nnz * sizeof(int),\n                        cudaMemcpyHostToDevice));\n  CHECK_CUDA(\n      cudaMemcpy(dY, hY.data(), size * sizeof(float), cudaMemcpyHostToDevice));\n\n  cusparseHandle_t handle = nullptr;\n  cusparseSpVecDescr_t vecX;\n  cusparseDnVecDescr_t vecY;\n\n  CHECK_CUSPARSE(cusparseCreate(&handle));\n  CHECK_CUSPARSE(cusparseCreateSpVec(&vecX, size, nnz, dX_indices, dX_values,\n                                     CUSPARSE_INDEX_32I,\n                                     CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));\n  CHECK_CUSPARSE(cusparseCreateDnVec(&vecY, size, dY, CUDA_R_32F));\n\n  CHECK_CUSPARSE(cusparseGather(handle, vecY, vecX));\n\n  CHECK_CUDA(cudaMemcpy(hX_values.data(), dX_values, nnz * sizeof(float),\n                        cudaMemcpyDeviceToHost));\n\n  CHECK_CUSPARSE(cusparseDestroySpVec(vecX));\n  CHECK_CUSPARSE(cusparseDestroyDnVec(vecY));\n  CHECK_CUSPARSE(cusparseDestroy(handle));\n  CHECK_CUDA(cudaFree(dX_indices));\n  CHECK_CUDA(cudaFree(dX_values));\n  CHECK_CUDA(cudaFree(dY));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cusparse_4__compile_error__cfcd99f6",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"gather.h\"\n#include \"cuda_helpers.h\"\n\nvoid gather(int size, int nnz, const std::vector<int> &hX_indices,\n            const std::vector<float> &hY, std::vector<float> &hX_values) {\n  int *dX_indices = nullptr;\n  float *dY = nullptr, *dX_values = nullptr;\n  CHECK_CUDA(cudaMalloc((void **)&dX_indices, nnz * sizeof(int)));\n  CHECK_CUDA(cudaMalloc((void **)&dX_values, nnz * sizeof(float)));\n  CHECK_CUDA(cudaMalloc((void **)&dY, size * sizeof(float)));\n\n  CHECK_CUDA(cudaMemcpy(dX_indices, hX_indices.data(), nnz * sizeof(int),\n                        cudaMemcpyHostToDevice));\n  CHECK_CUDA(\n      cudaMemcpy(dY, hY.data(), size * sizeof(float), cudaMemcpyHostToDevice));\n\n  cusparseHandle_t handle = nullptr;\n  cusparseSpVecDescr_t vecX;\n  cusparseDnVecDescr_t vecY;\n\n  CHECK_CUSPARSE(cusparseCreate(&handle));\n  CHECK_CUSPARSE(cusparseCreateSpVec(&vecX, size, nnz, dX_indices, dX_values,\n                                     CUSPARSE_INDEX_32I,\n                                     CUSPARSE_INDEX_BASE_ZERO, CUDA_R_32F));\n  CHECK_CUSPARSE(cusparseCreateDnVec(&vecY, size, dY, CUDA_R_32F));\n\n  CHECK_CUSPARSE(cusparseGather(handle, vecY, vecX));\n\n  CHECK_CUDA(cudaMemcpy(hX_values.data(), dX_values, nnz * sizeof(float),\n                        cudaMemcpyDeviceToHost));\n\n  CHECK_CUSPARSE(cusparseDestroySpVec(vecX));\n  CHECK_CUSPARSE(cusparseDestroyDnVec(vecY));\n  CHECK_CUSPARSE(cusparseDestroy(handle));\n  CHECK_CUDA(cudaFree(dX_indices));\n  CHECK_CUDA(cudaFree(dX_values));\n  CHECK_CUDA(cudaFree(dY));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

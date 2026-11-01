@@ -14,6 +14,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from .task_registry import resolve_task_paths
+
 logger = logging.getLogger("cuda_debugger_exp")
 
 # Map sm codes to minimum compute capability required to RUN the binary.
@@ -66,8 +68,13 @@ def check_task_gpu_compat(
     if gpu_cap is None:
         return True, "no GPU info, assuming compatible"
 
-    # Check Makefile in testbench
-    makefile = dataset_dir / "testbench" / task_stem / "Makefile"
+    # Check Makefile in testbench. benchmark/task_list.json entries resolve to
+    # data/<instance>/testbench; legacy flat datasets still work.
+    try:
+        testbench = resolve_task_paths(task_stem, dataset_dir).testbench_path
+    except FileNotFoundError:
+        return False, "task paths not found"
+    makefile = testbench / "Makefile"
     arch_codes = _parse_makefile_arch(makefile)
 
     for code in arch_codes:

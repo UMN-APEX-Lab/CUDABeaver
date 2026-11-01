@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_177__compile_error__192ea167",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include <cub/cub.cuh>\n#include \"histogram.h\"\n#include \"histogram_helpers.h\"\n\nvoid calcMultiHistogram(uint8_t* inputImage_d, int** histogram_d,\n                          int* numLevels_h, unsigned int* lowerLevel_h,\n                          unsigned int* upperLevel_h, int numPixels,\n                          cudaStream_t stream) {\n\n    // Determine temporary device storage requirements\n    void* workStorage_d  = nullptr;\n    size_t   workStorageBytes = 0;\n    CUB_CHECK((cub::DeviceHistogram::MultiHistogramEven<NUM_CHANNELS, NUM_ACTIVE_CHANNELS>(\n        workStorage_d, workStorageBytes,\n      inputImage_d, histogram_d, numLevels_h,\n      lowerLevel_h, upperLevel_h, numPixels, stream)));\n\n    // Allocate temporary storage\n    CUDA_CHECK(cudaMallocAsync(&workStorage_d, workStorageBytes, stream));\n\n    // Compute histograms\n    CUB_CHECK((cub::DeviceHistogram::MultiHistogramEven<NUM_CHANNELS, NUM_ACTIVE_CHANNELS>(\n        workStorage_d, workStorageBytes,\n      inputImage_d, histogram_d, numLevels_h,\n      lowerLevel_h, upperLevel_h, numPixels, stream)));\n\n    CUDA_CHECK(cudaFreeAsync(workStorage_d, stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_177__compile_error__192ea167",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include <cub/cub.cuh>\n#include \"histogram.h\"\n#include \"histogram_helpers.h\"\n\nvoid calcMultiHistogram(uint8_t* inputImage_d, int** histogram_d,\n                          int* numLevels_h, unsigned int* lowerLevel_h,\n                          unsigned int* upperLevel_h, int numPixels,\n                          cudaStream_t stream) {\n\n    // Determine temporary device storage requirements\n    void* workStorage_d  = nullptr;\n    size_t   workStorageBytes = 0;\n    CUB_CHECK((cub::DeviceHistogram::MultiHistogramEven<NUM_CHANNELS, NUM_ACTIVE_CHANNELS>(\n        workStorage_d, workStorageBytes,\n      inputImage_d, histogram_d, numLevels_h,\n      lowerLevel_h, upperLevel_h, numPixels, stream)));\n\n    // Allocate temporary storage\n    CUDA_CHECK(cudaMallocAsync(&workStorage_d, workStorageBytes, stream));\n\n    // Compute histograms\n    CUB_CHECK((cub::DeviceHistogram::MultiHistogramEven<NUM_CHANNELS, NUM_ACTIVE_CHANNELS>(\n        workStorage_d, workStorageBytes,\n      inputImage_d, histogram_d, numLevels_h,\n      lowerLevel_h, upperLevel_h, numPixels, stream)));\n\n    CUDA_CHECK(cudaFreeAsync(workStorage_d, stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

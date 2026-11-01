@@ -11,7 +11,7 @@
 # Output: outputs_repeated/gpt5_4/<timestamp>/
 #
 # Task selection: full 200 v2 tasks. 46 broken_starts were sampled from
-# GPT-5.4; kept in for cross-model repeated@5 comparability. Analysis
+# GPT-5.4; kept in for cross-model pass@5 comparability. Analysis
 # flags these 46 and reports the caveat. See EXPERIMENTS_OVERVIEW.md §0.2.
 api:
   backend: openai

@@ -11,11 +11,14 @@ class ValidationError(ValueError):
 
 
 _TIMING_MODES = {
-    "region",                     # NVTX region timing (curated_cuda_pool majority)
-    "kernels",                    # All CUDA kernels aggregate (curated_cuda_pool minority)
+    "region",                     # Legacy alias; executed via cuda_event_stdout
+    "kernels",                    # Legacy alias; executed via cuda_event_stdout
+    "cuda_event_stdout",          # Direct cudaEvent timing printed by the benchmark
     "process",                    # Process wall clock (curated_cuda_pool, unused in our 166)
     "kernelbench_eval_result",    # kernelbench eval_kernel_against_ref result dict
     "total_elapsed",              # Generic wall-clock fallback (TK)
+    "applied_kernels_make_speedup",
+    "thunderkittens_stdout",
 }
 _REF_TYPES = {"file", "kernelbench_problem"}
 
@@ -57,7 +60,16 @@ class ReferenceSolution:
 
 @dataclass(frozen=True)
 class TimingMode:
-    type: Literal["nvtx_region", "kernelbench_eval_result", "total_elapsed"]
+    type: Literal[
+        "region",
+        "kernels",
+        "cuda_event_stdout",
+        "process",
+        "kernelbench_eval_result",
+        "total_elapsed",
+        "applied_kernels_make_speedup",
+        "thunderkittens_stdout",
+    ]
     include: Optional[list] = None
     time_type: Optional[str] = None
 
@@ -120,6 +132,22 @@ class Reference:
                 "type": "kernelbench_problem",
                 "problem_path": sol.problem_path,
             }
+        return hashlib.sha256(
+            json.dumps(payload, sort_keys=True).encode()
+        ).hexdigest()
+
+    def timing_fingerprint(self) -> str:
+        """Hash timing configuration so stale reference timing caches are rejected."""
+        payload = {
+            "benchmark_command": self.benchmark_command,
+            "timing_mode": {
+                "type": self.timing_mode.type,
+                "include": self.timing_mode.include,
+                "time_type": self.timing_mode.time_type,
+            },
+            "n_trials": self.n_trials,
+            "warmup_trials": self.warmup_trials,
+        }
         return hashlib.sha256(
             json.dumps(payload, sort_keys=True).encode()
         ).hexdigest()

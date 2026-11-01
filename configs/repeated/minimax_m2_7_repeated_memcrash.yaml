@@ -1,4 +1,4 @@
-# v3 mem_crash supplemental — minimax_m2_7_repeated_memcrash (repeated@5)
+# v3 mem_crash supplemental — minimax_m2_7_repeated_memcrash (pass@5)
 api:
   backend: openai
   model: minimaxai/minimax-m2.7

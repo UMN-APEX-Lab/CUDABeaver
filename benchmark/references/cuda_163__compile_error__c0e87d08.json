@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_163__compile_error__c0e87d08",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"lcg_kernel.h\"\n\n__global__ void k_calculateLCG(uint32_t * __restrict__ data_d, int numElements) {\n    constexpr int EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE = 2;\n    constexpr int STARTING_ITERATION_FOR_COMPUTATION = 1;\n    int numThreadsPerBlock = blockDim.x;\n    int globalThreadId = threadIdx.x + blockIdx.x * numThreadsPerBlock;\n    int numTotalThreads = numThreadsPerBlock * gridDim.x;\n    int numElementsPerGrid = numTotalThreads * MEMORY_ACCESS_WIDTH;\n    int numGridStrideIterations = EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE + 1 + (numElements - 1) / numElementsPerGrid;\n    // Mapping the dynamically allocated shared memory to two regions to be used asynchronously.\n    extern __shared__ char s_dynamicBuffer[];\n    uint4 * __restrict__ s_asyncLoadStorage1 = reinterpret_cast<uint4*>(&s_dynamicBuffer[0]);\n    uint4 * __restrict__ s_asyncLoadStorage2 = s_asyncLoadStorage1 + numThreadsPerBlock;\n    int storageSelector = 0;\n    for(int stride = 0; stride < numGridStrideIterations; stride++) {\n        int id = stride * numElementsPerGrid + globalThreadId * MEMORY_ACCESS_WIDTH;\n        auto selectedStorage = storageSelector++ & 1;\n        // Asynchronously loading the next iteration's data.\n        if(stride < numGridStrideIterations - EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE){\n            if(id < numElements) {\n                // Reading multiple elements at once.\n                uint4 * __restrict__ accessPtr = reinterpret_cast<uint4*>(&data_d[id]);\n                __pipeline_memcpy_async(selectedStorage ? &s_asyncLoadStorage1[threadIdx.x] : &s_asyncLoadStorage2[threadIdx.x], accessPtr, sizeof(uint4));\n                __pipeline_commit();\n            }\n        }\n        // The element index for computation is based on the async loading index, lagging by numElementsPerGrid elements.\n        int idForComputation = id - numElementsPerGrid;\n        if(idForComputation < numElements && stride >= STARTING_ITERATION_FOR_COMPUTATION) {\n            // Reading multiple elements at once.\n            uint4 * __restrict__ accessPtr = reinterpret_cast<uint4*>(selectedStorage ? &s_asyncLoadStorage2[threadIdx.x] : &s_asyncLoadStorage1[threadIdx.x]);\n            // Computing the linear congruential generator algorithm for each 32bit element, one at a time to lower the register pressure for higher occupancy and hiding more latency.\n            uint64_t data = accessPtr->x;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->x = data;\n            data = accessPtr->y;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->y = data;\n            data = accessPtr->z;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->z = data;\n            data = accessPtr->w;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->w = data;\n            // Writing multiple elements at once.\n            *reinterpret_cast<uint4*>(&data_d[idForComputation]) = *accessPtr;\n        }\n        __pipeline_wait_prior(0);\n        __syncthreads();\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_163__compile_error__c0e87d08",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"lcg_kernel.h\"\n\n__global__ void k_calculateLCG(uint32_t * __restrict__ data_d, int numElements) {\n    constexpr int EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE = 2;\n    constexpr int STARTING_ITERATION_FOR_COMPUTATION = 1;\n    int numThreadsPerBlock = blockDim.x;\n    int globalThreadId = threadIdx.x + blockIdx.x * numThreadsPerBlock;\n    int numTotalThreads = numThreadsPerBlock * gridDim.x;\n    int numElementsPerGrid = numTotalThreads * MEMORY_ACCESS_WIDTH;\n    int numGridStrideIterations = EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE + 1 + (numElements - 1) / numElementsPerGrid;\n    // Mapping the dynamically allocated shared memory to two regions to be used asynchronously.\n    extern __shared__ char s_dynamicBuffer[];\n    uint4 * __restrict__ s_asyncLoadStorage1 = reinterpret_cast<uint4*>(&s_dynamicBuffer[0]);\n    uint4 * __restrict__ s_asyncLoadStorage2 = s_asyncLoadStorage1 + numThreadsPerBlock;\n    int storageSelector = 0;\n    for(int stride = 0; stride < numGridStrideIterations; stride++) {\n        int id = stride * numElementsPerGrid + globalThreadId * MEMORY_ACCESS_WIDTH;\n        auto selectedStorage = storageSelector++ & 1;\n        // Asynchronously loading the next iteration's data.\n        if(stride < numGridStrideIterations - EXTRA_ITERATIONS_FOR_DOUBLE_BUFFERING_PIPELINE){\n            if(id < numElements) {\n                // Reading multiple elements at once.\n                uint4 * __restrict__ accessPtr = reinterpret_cast<uint4*>(&data_d[id]);\n                __pipeline_memcpy_async(selectedStorage ? &s_asyncLoadStorage1[threadIdx.x] : &s_asyncLoadStorage2[threadIdx.x], accessPtr, sizeof(uint4));\n                __pipeline_commit();\n            }\n        }\n        // The element index for computation is based on the async loading index, lagging by numElementsPerGrid elements.\n        int idForComputation = id - numElementsPerGrid;\n        if(idForComputation < numElements && stride >= STARTING_ITERATION_FOR_COMPUTATION) {\n            // Reading multiple elements at once.\n            uint4 * __restrict__ accessPtr = reinterpret_cast<uint4*>(selectedStorage ? &s_asyncLoadStorage2[threadIdx.x] : &s_asyncLoadStorage1[threadIdx.x]);\n            // Computing the linear congruential generator algorithm for each 32bit element, one at a time to lower the register pressure for higher occupancy and hiding more latency.\n            uint64_t data = accessPtr->x;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->x = data;\n            data = accessPtr->y;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->y = data;\n            data = accessPtr->z;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->z = data;\n            data = accessPtr->w;\n            for(int step = 0; step < LCG_STEPS; step++) {\n                data = (data * LCG_MULTIPLIER + LCG_OFFSET) % LCG_MODULUS;\n            }\n            accessPtr->w = data;\n            // Writing multiple elements at once.\n            *reinterpret_cast<uint4*>(&data_d[idForComputation]) = *accessPtr;\n        }\n        __pipeline_wait_prior(0);\n        __syncthreads();\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

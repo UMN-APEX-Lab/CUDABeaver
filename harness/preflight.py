@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from .gpu_compat import get_gpu_compute_cap, filter_compatible_tasks
+from .task_registry import is_flat_dataset, resolve_task_paths
 
 
 @dataclass
@@ -100,7 +101,10 @@ def run_preflight(
     # 5. Task-level validation (spot check)
     _check_tasks(report, filtered[:10], dataset_dir)  # check first 10
 
-    # 6. Disk space
+    # 6. Performance reference cache
+    _check_reference_cache(report, config, filtered, dataset_dir)
+
+    # 7. Disk space
     _check_disk(report, config)
 
     return report, filtered
@@ -155,6 +159,14 @@ def _check_api_key(report: PreflightReport, config: dict):
 
 
 def _check_dataset(report: PreflightReport, dataset_dir: Path):
+    if not is_flat_dataset(dataset_dir):
+        task_list = Path(__file__).resolve().parents[1] / "benchmark" / "task_list.json"
+        if task_list.exists():
+            report.add_warning(
+                "dataset",
+                f"{dataset_dir} is not a flat dataset; using {task_list}",
+            )
+            return
     for subdir in ("input", "prompts", "testbench"):
         p = dataset_dir / subdir
         if not p.exists():
@@ -165,7 +177,13 @@ def _check_dataset(report: PreflightReport, dataset_dir: Path):
 
 def _check_tasks(report: PreflightReport, task_stems: list[str], dataset_dir: Path):
     for stem in task_stems:
-        input_file = dataset_dir / "input" / f"{stem}.json"
+        try:
+            paths = resolve_task_paths(stem, dataset_dir)
+        except FileNotFoundError as exc:
+            report.add_error("task", str(exc))
+            continue
+
+        input_file = paths.input_path
         if not input_file.exists():
             report.add_error("task", f"Missing input: {input_file}")
             continue
@@ -176,13 +194,85 @@ def _check_tasks(report: PreflightReport, task_stems: list[str], dataset_dir: Pa
         except json.JSONDecodeError:
             report.add_error("task", f"{stem}: invalid JSON in input file")
 
-        prompt_file = dataset_dir / "prompts" / f"{stem}.txt"
+        prompt_file = paths.prompt_path
         if not prompt_file.exists():
             report.add_error("task", f"Missing prompt: {prompt_file}")
 
-        testbench = dataset_dir / "testbench" / stem
+        testbench = paths.testbench_path
         if not testbench.exists():
             report.add_error("task", f"Missing testbench: {testbench}")
+
+
+def _performance_gate_requires_cache(config: dict) -> tuple[bool, bool]:
+    raw = config.get("performance_gate")
+    if raw is None:
+        raw = config.get("experiment", {}).get("performance_gate")
+    if not isinstance(raw, dict) or not raw.get("enabled", True):
+        return False, False
+    measure_on_pass = bool(config.get("experiment", {}).get("measure_perf_on_pass", True))
+    return measure_on_pass, bool(raw.get("fail_on_skipped", False))
+
+
+def _check_reference_cache(
+    report: PreflightReport,
+    config: dict,
+    task_stems: list[str],
+    dataset_dir: Path,
+) -> None:
+    required, hard_fail = _performance_gate_requires_cache(config)
+    if not required:
+        return
+
+    try:
+        from .benchmark import cache_lookup, load_reference
+    except Exception as exc:
+        report.add_error("reference_cache", f"Could not import benchmark cache helpers: {exc}")
+        return
+
+    missing: list[str] = []
+    errors: list[str] = []
+    skipped: list[str] = []
+    for stem in task_stems:
+        try:
+            ref = load_reference(stem, dataset_root=dataset_dir)
+            cached = cache_lookup(ref, dataset_root=dataset_dir)
+        except Exception as exc:
+            errors.append(f"{stem}: {type(exc).__name__}: {str(exc)[:160]}")
+            continue
+        if cached is None:
+            missing.append(stem)
+        elif cached.skipped:
+            skipped.append(f"{stem}:{cached.skipped}")
+
+    if not missing and not errors and not skipped:
+        return
+
+    details = []
+    if missing:
+        details.append(
+            f"missing {len(missing)} cache entries ({', '.join(missing[:12])}"
+            f"{'...' if len(missing) > 12 else ''})"
+        )
+    if skipped:
+        details.append(
+            f"skipped {len(skipped)} references ({', '.join(skipped[:6])}"
+            f"{'...' if len(skipped) > 6 else ''})"
+        )
+    if errors:
+        details.append(
+            f"errors {len(errors)} ({'; '.join(errors[:4])}"
+            f"{'...' if len(errors) > 4 else ''})"
+        )
+    message = (
+        "; ".join(details)
+        + ". Precompute references first, e.g. "
+        "`python3 scripts/measure_logic_baselines.py --dataset-root data "
+        "--task-list benchmark/task_list.json --error-category memory_crash --gpu <id>`."
+    )
+    if hard_fail:
+        report.add_error("reference_cache", message)
+    else:
+        report.add_warning("reference_cache", message)
 
 
 def _check_disk(report: PreflightReport, config: dict):

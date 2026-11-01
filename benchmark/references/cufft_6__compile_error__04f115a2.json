@@ -1,24 +1,18 @@
 {
- "task_id": "cufft_6__compile_error__04f115a2",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"fft_mgpu.h\"\n#include \"fft_helpers.h\"\n\nvoid fft_3d_mgpu_r2c_c2r_example(std::array<int, 3> &dims,\n                                 std::vector<int> &gpus,\n                                 std::vector<std::complex<float>> &h_data_in,\n                                 std::vector<std::complex<float>> &h_data_out) {\n  cufftHandle plan_r2c{};\n  cufftHandle plan_c2r{};\n  CUFFT_CALL(cufftCreate(&plan_r2c));\n  CUFFT_CALL(cufftCreate(&plan_c2r));\n\n#if CUFFT_VERSION >= 10400\n  cudaStream_t stream{};\n  CUDA_RT_CALL(cudaStreamCreate(&stream));\n  CUFFT_CALL(cufftSetStream(plan_r2c, stream));\n  CUFFT_CALL(cufftSetStream(plan_c2r, stream));\n#endif\n\n  CUFFT_CALL(cufftXtSetGPUs(plan_r2c, gpus.size(), gpus.data()));\n  CUFFT_CALL(cufftXtSetGPUs(plan_c2r, gpus.size(), gpus.data()));\n\n  size_t workspace_sizes[gpus.size()];\n  CUFFT_CALL(cufftMakePlan3d(plan_r2c, dims[0], dims[1], dims[2], CUFFT_R2C,\n                             workspace_sizes));\n  CUFFT_CALL(cufftMakePlan3d(plan_c2r, dims[0], dims[1], dims[2], CUFFT_C2R,\n                             workspace_sizes));\n\n  cudaLibXtDesc *indesc = nullptr;\n  CUFFT_CALL(cufftXtMalloc(plan_r2c, &indesc, CUFFT_XT_FORMAT_INPLACE));\n  CUFFT_CALL(cufftXtMemcpy(plan_r2c, reinterpret_cast<void *>(indesc),\n                           reinterpret_cast<void *>(h_data_in.data()),\n                           CUFFT_COPY_HOST_TO_DEVICE));\n\n  CUFFT_CALL(cufftXtExecDescriptor(plan_r2c, indesc, indesc, CUFFT_FORWARD));\n\n  float scale{2.f};\n  scaleComplex(indesc, scale, h_data_out.size(), gpus.size());\n\n  CUFFT_CALL(cufftXtExecDescriptor(plan_c2r, indesc, indesc, CUFFT_INVERSE));\n\n  CUFFT_CALL(cufftXtMemcpy(\n      plan_c2r, reinterpret_cast<void *>(h_data_out.data()),\n      reinterpret_cast<void *>(indesc), CUFFT_COPY_DEVICE_TO_HOST));\n\n  CUFFT_CALL(cufftXtFree(indesc));\n  CUFFT_CALL(cufftDestroy(plan_r2c));\n  CUFFT_CALL(cufftDestroy(plan_c2r));\n\n#if CUFFT_VERSION >= 10400\n  CUDA_RT_CALL(cudaStreamDestroy(stream));\n#endif\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cufft_6__compile_error__04f115a2",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"fft_mgpu.h\"\n#include \"fft_helpers.h\"\n\nvoid fft_3d_mgpu_r2c_c2r_example(std::array<int, 3> &dims,\n                                 std::vector<int> &gpus,\n                                 std::vector<std::complex<float>> &h_data_in,\n                                 std::vector<std::complex<float>> &h_data_out) {\n  cufftHandle plan_r2c{};\n  cufftHandle plan_c2r{};\n  CUFFT_CALL(cufftCreate(&plan_r2c));\n  CUFFT_CALL(cufftCreate(&plan_c2r));\n\n#if CUFFT_VERSION >= 10400\n  cudaStream_t stream{};\n  CUDA_RT_CALL(cudaStreamCreate(&stream));\n  CUFFT_CALL(cufftSetStream(plan_r2c, stream));\n  CUFFT_CALL(cufftSetStream(plan_c2r, stream));\n#endif\n\n  CUFFT_CALL(cufftXtSetGPUs(plan_r2c, gpus.size(), gpus.data()));\n  CUFFT_CALL(cufftXtSetGPUs(plan_c2r, gpus.size(), gpus.data()));\n\n  size_t workspace_sizes[gpus.size()];\n  CUFFT_CALL(cufftMakePlan3d(plan_r2c, dims[0], dims[1], dims[2], CUFFT_R2C,\n                             workspace_sizes));\n  CUFFT_CALL(cufftMakePlan3d(plan_c2r, dims[0], dims[1], dims[2], CUFFT_C2R,\n                             workspace_sizes));\n\n  cudaLibXtDesc *indesc = nullptr;\n  CUFFT_CALL(cufftXtMalloc(plan_r2c, &indesc, CUFFT_XT_FORMAT_INPLACE));\n  CUFFT_CALL(cufftXtMemcpy(plan_r2c, reinterpret_cast<void *>(indesc),\n                           reinterpret_cast<void *>(h_data_in.data()),\n                           CUFFT_COPY_HOST_TO_DEVICE));\n\n  CUFFT_CALL(cufftXtExecDescriptor(plan_r2c, indesc, indesc, CUFFT_FORWARD));\n\n  float scale{2.f};\n  scaleComplex(indesc, scale, h_data_out.size(), gpus.size());\n\n  CUFFT_CALL(cufftXtExecDescriptor(plan_c2r, indesc, indesc, CUFFT_INVERSE));\n\n  CUFFT_CALL(cufftXtMemcpy(\n      plan_c2r, reinterpret_cast<void *>(h_data_out.data()),\n      reinterpret_cast<void *>(indesc), CUFFT_COPY_DEVICE_TO_HOST));\n\n  CUFFT_CALL(cufftXtFree(indesc));\n  CUFFT_CALL(cufftDestroy(plan_r2c));\n  CUFFT_CALL(cufftDestroy(plan_c2r));\n\n#if CUFFT_VERSION >= 10400\n  CUDA_RT_CALL(cudaStreamDestroy(stream));\n#endif\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

@@ -1,24 +1,18 @@
 {
- "task_id": "cublas_extensions_15__compile_error__8996b099",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"scale_vector.h\"\n\nvoid scale_vector(int n, double alpha, const std::vector<double> &in,\n                  std::vector<double> &out) {\n  cublasHandle_t cublasH = nullptr;\n  cudaStream_t stream = nullptr;\n  double *d_in = nullptr;\n  double *d_out = nullptr;\n\n  CUBLAS_CHECK(cublasCreate(&cublasH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUBLAS_CHECK(cublasSetStream(cublasH, stream));\n\n  CUDA_CHECK(cudaMalloc(&d_in, n * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&d_out, n * sizeof(double)));\n\n  CUDA_CHECK(\n      cudaMemcpyAsync(d_in, in.data(), n * sizeof(double), cudaMemcpyHostToDevice, stream));\n\n  CUDA_CHECK(\n      cudaMemcpyAsync(d_out, d_in, n * sizeof(double), cudaMemcpyDeviceToDevice, stream));\n\n  CUBLAS_CHECK(cublasScalEx(cublasH, n, &alpha, CUDA_R_64F, d_out, CUDA_R_64F,\n                            1, CUDA_R_64F));\n\n  CUDA_CHECK(cudaMemcpyAsync(out.data(), d_out, n * sizeof(double),\n                        cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(d_in));\n  CUDA_CHECK(cudaFree(d_out));\n  CUBLAS_CHECK(cublasDestroy(cublasH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cublas_extensions_15__compile_error__8996b099",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"scale_vector.h\"\n\nvoid scale_vector(int n, double alpha, const std::vector<double> &in,\n                  std::vector<double> &out) {\n  cublasHandle_t cublasH = nullptr;\n  cudaStream_t stream = nullptr;\n  double *d_in = nullptr;\n  double *d_out = nullptr;\n\n  CUBLAS_CHECK(cublasCreate(&cublasH));\n  CUDA_CHECK(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));\n  CUBLAS_CHECK(cublasSetStream(cublasH, stream));\n\n  CUDA_CHECK(cudaMalloc(&d_in, n * sizeof(double)));\n  CUDA_CHECK(cudaMalloc(&d_out, n * sizeof(double)));\n\n  CUDA_CHECK(\n      cudaMemcpyAsync(d_in, in.data(), n * sizeof(double), cudaMemcpyHostToDevice, stream));\n\n  CUDA_CHECK(\n      cudaMemcpyAsync(d_out, d_in, n * sizeof(double), cudaMemcpyDeviceToDevice, stream));\n\n  CUBLAS_CHECK(cublasScalEx(cublasH, n, &alpha, CUDA_R_64F, d_out, CUDA_R_64F,\n                            1, CUDA_R_64F));\n\n  CUDA_CHECK(cudaMemcpyAsync(out.data(), d_out, n * sizeof(double),\n                        cudaMemcpyDeviceToHost, stream));\n\n  CUDA_CHECK(cudaStreamSynchronize(stream));\n\n  CUDA_CHECK(cudaFree(d_in));\n  CUDA_CHECK(cudaFree(d_out));\n  CUBLAS_CHECK(cublasDestroy(cublasH));\n  CUDA_CHECK(cudaStreamDestroy(stream));\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

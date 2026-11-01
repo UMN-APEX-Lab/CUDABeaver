@@ -1,15 +1,14 @@
 {
- "task_id": "kernelbench_level2_22__compile_error__31cb416e",
- "reference_solution": {
-  "type": "kernelbench_problem",
-  "problem_path": "kernelbench/KernelBench/level2/22_Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish.py",
-  "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a matrix multiplication, scales the result, adds a residual connection, clamps the output,\n    applies LogSumExp, and finally applies the Mish activation function.\n    \"\"\"\n    def __init__(self, input_size, hidden_size, scale_factor, clamp_min, clamp_max):\n        super(Model, self).__init__()\n        self.matmul = nn.Linear(input_size, hidden_size)\n        self.scale_factor = scale_factor\n        self.clamp_min = clamp_min\n        self.clamp_max = clamp_max\n\n    def forward(self, x):\n        \"\"\"\n        Args:\n            x: Input tensor of shape (batch_size, input_size).\n\n        Returns:\n            Output tensor of shape (batch_size, hidden_size).\n        \"\"\"\n        x = self.matmul(x)\n        x = x * self.scale_factor\n        x = x + x\n        x = torch.clamp(x, self.clamp_min, self.clamp_max)\n        x = torch.logsumexp(x, dim=1, keepdim=True)\n        x = x * torch.nn.functional.mish(x)  # Mish activation\n        return x\n\nbatch_size = 1024\ninput_size = 8192\nhidden_size = 8192\nscale_factor = 2.0\nclamp_min = -10.0\nclamp_max = 10.0\n\ndef get_inputs():\n    return [torch.rand(batch_size, input_size)]\n\ndef get_init_inputs():\n    return [input_size, hidden_size, scale_factor, clamp_min, clamp_max]"
- },
- "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Hopper']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, num_perf_trials=10, timing_method='cuda_event', num_correct_trials=2, backend='cuda', precision=get_torch_dtype_from_string('fp32')); print(result)\"",
- "timing_mode": {
-  "type": "kernelbench_eval_result"
- },
- "n_trials": 10,
- "warmup_trials": 0,
- "requires_arch": null
+  "task_id": "kernelbench_level2_22__compile_error__31cb416e",
+  "reference_solution": {
+    "type": "kernelbench_problem",
+    "problem_path": "testbench/kernelbench_level2_22/problem.py",
+    "problem_content": "import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    \"\"\"\n    Model that performs a matrix multiplication, scales the result, adds a residual connection, clamps the output,\n    applies LogSumExp, and finally applies the Mish activation function.\n    \"\"\"\n    def __init__(self, input_size, hidden_size, scale_factor, clamp_min, clamp_max):\n        super(Model, self).__init__()\n        self.matmul = nn.Linear(input_size, hidden_size)\n        self.scale_factor = scale_factor\n        self.clamp_min = clamp_min\n        self.clamp_max = clamp_max\n\n    def forward(self, x):\n        \"\"\"\n        Args:\n            x: Input tensor of shape (batch_size, input_size).\n\n        Returns:\n            Output tensor of shape (batch_size, hidden_size).\n        \"\"\"\n        x = self.matmul(x)\n        x = x * self.scale_factor\n        x = x + x\n        x = torch.clamp(x, self.clamp_min, self.clamp_max)\n        x = torch.logsumexp(x, dim=1, keepdim=True)\n        x = x * torch.nn.functional.mish(x)  # Mish activation\n        return x\n\nbatch_size = 1024\ninput_size = 8192\nhidden_size = 8192\nscale_factor = 2.0\nclamp_min = -10.0\nclamp_max = 10.0\n\ndef get_inputs():\n    return [torch.rand(batch_size, input_size)]\n\ndef get_init_inputs():\n    return [input_size, hidden_size, scale_factor, clamp_min, clamp_max]"
+  },
+  "benchmark_command": "python -c \"from pathlib import Path; from kernelbench.eval import eval_kernel_against_ref, get_torch_dtype_from_string; from kernelbench.utils import set_gpu_arch; set_gpu_arch(['Blackwell']); problem = Path('problem.py').read_text(encoding='utf-8'); solution = Path('solution.py').read_text(encoding='utf-8'); result = eval_kernel_against_ref(original_model_src=problem, custom_model_src=solution, verbose=False, measure_performance=True, timing_method='cuda_event', num_correct_trials=2, num_perf_trials=100, backend='cuda', precision=get_torch_dtype_from_string('fp32'), check_for_excessive_speedup=False); print(result); raise SystemExit(0 if (result and result.compiled and result.correctness and result.runtime_stats) else 1)\"",
+  "timing_mode": {
+    "type": "kernelbench_eval_result"
+  },
+  "n_trials": 100,
+  "warmup_trials": 0
 }

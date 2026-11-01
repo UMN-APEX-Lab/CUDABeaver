@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_198__compile_error__4f12b566",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"broadcast_tree.h\"\n\n__device__ __forceinline__ uint32_t d_broadcast(uint32_t messageId, \n                                                int warpLane, \n                                                uint32_t * message_d, \n                                                int numCommunicatingWarps, \n                                                int globalWarpId) {\n    constexpr int BINARY_TREE_PATTERN_MULTIPLIER = 2;\n    constexpr int BINARY_TREE_LEFT_CHILD_NODE = 1;\n    constexpr int BINARY_TREE_RIGHT_CHILD_NODE = 2;\n    int destinationBinaryTreeNodeOffset = globalWarpId * BINARY_TREE_PATTERN_MULTIPLIER;\n    // Current warp is interpreted as the current parent node.\n    int readIndex = globalWarpId * warpSize + warpLane;\n    // The next two nodes in binary tree indexing are the child nodes of the parent.\n    int leftChildNode = destinationBinaryTreeNodeOffset + BINARY_TREE_LEFT_CHILD_NODE;\n    int rightChildNode = destinationBinaryTreeNodeOffset + BINARY_TREE_RIGHT_CHILD_NODE;\n    int writeIndex1 = leftChildNode * warpSize + warpLane;\n    int writeIndex2 = rightChildNode * warpSize + warpLane;\n    while(true) {\n        // Receiving data from a warp.\n        uint32_t message = atomicExch(&message_d[readIndex], 0); \n        if((message & ID_MASK) == messageId) {\n            // Sending data to two additional warps.\n            if (leftChildNode < numCommunicatingWarps) {\n                atomicExch(&message_d[writeIndex1], message);\n            }\n            if (rightChildNode < numCommunicatingWarps) {\n                atomicExch(&message_d[writeIndex2], message);\n            }\n            // Decoding the data by shifting the id bits out.\n            return message >> ID_BITS;\n        }\n    }\n}\n\n__global__ void k_broadcastWithHierarchicalPath(uint32_t input, \n                                                uint32_t * message_d, \n                                                int numCommunicatingWarps, \n                                                int * output_d) {\n    int globalThreadId = threadIdx.x + blockIdx.x * blockDim.x;\n    int globalWarpId = globalThreadId / warpSize;\n    int warpLane = globalThreadId % warpSize;\n    // A non-zero message index between 1 and 255 is required to work. Sample message id is chosen as a 1-based warp lane index. Any two warps in communication must have same message id in their corresponding warp lanes to receive/send data properly.\n    uint32_t sampleMessageIndex = warpLane + 1;  \n    bool broadcaster = globalWarpId == 0;\n    bool warpIsInTheHierarchy = globalWarpId < numCommunicatingWarps;\n    // Sending a message (thread index + input) from the first warp. The datas are 0, 1, 2, ..., 31.\n    uint32_t sampleData = globalThreadId + input;\n    uint32_t messageId = sampleMessageIndex;\n    // Only the first warp requires preparation of the message as it is the broadcaster.\n    if (broadcaster) {\n        // Encoding messageId and sample data. Sample data is written to the most significant 24 bits of the message, and the message ID is written to the least significant 8 bits of the message. This is for atomically sending both id and data.\n        uint32_t message = ((sampleData << ID_BITS) | messageId);\n        message_d[warpLane] = message;\n        __threadfence(); \n    }\n    if(warpIsInTheHierarchy) {\n        // Receiving the message and sending it to the next two warps, with minimal contention.\n        uint32_t receivedSampleData = d_broadcast(messageId, warpLane, message_d, numCommunicatingWarps, globalWarpId);\n        // Writing the result.\n        output_d[globalThreadId] = receivedSampleData;\n    }\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_198__compile_error__4f12b566",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"broadcast_tree.h\"\n\n__device__ __forceinline__ uint32_t d_broadcast(uint32_t messageId, \n                                                int warpLane, \n                                                uint32_t * message_d, \n                                                int numCommunicatingWarps, \n                                                int globalWarpId) {\n    constexpr int BINARY_TREE_PATTERN_MULTIPLIER = 2;\n    constexpr int BINARY_TREE_LEFT_CHILD_NODE = 1;\n    constexpr int BINARY_TREE_RIGHT_CHILD_NODE = 2;\n    int destinationBinaryTreeNodeOffset = globalWarpId * BINARY_TREE_PATTERN_MULTIPLIER;\n    // Current warp is interpreted as the current parent node.\n    int readIndex = globalWarpId * warpSize + warpLane;\n    // The next two nodes in binary tree indexing are the child nodes of the parent.\n    int leftChildNode = destinationBinaryTreeNodeOffset + BINARY_TREE_LEFT_CHILD_NODE;\n    int rightChildNode = destinationBinaryTreeNodeOffset + BINARY_TREE_RIGHT_CHILD_NODE;\n    int writeIndex1 = leftChildNode * warpSize + warpLane;\n    int writeIndex2 = rightChildNode * warpSize + warpLane;\n    while(true) {\n        // Receiving data from a warp.\n        uint32_t message = atomicExch(&message_d[readIndex], 0); \n        if((message & ID_MASK) == messageId) {\n            // Sending data to two additional warps.\n            if (leftChildNode < numCommunicatingWarps) {\n                atomicExch(&message_d[writeIndex1], message);\n            }\n            if (rightChildNode < numCommunicatingWarps) {\n                atomicExch(&message_d[writeIndex2], message);\n            }\n            // Decoding the data by shifting the id bits out.\n            return message >> ID_BITS;\n        }\n    }\n}\n\n__global__ void k_broadcastWithHierarchicalPath(uint32_t input, \n                                                uint32_t * message_d, \n                                                int numCommunicatingWarps, \n                                                int * output_d) {\n    int globalThreadId = threadIdx.x + blockIdx.x * blockDim.x;\n    int globalWarpId = globalThreadId / warpSize;\n    int warpLane = globalThreadId % warpSize;\n    // A non-zero message index between 1 and 255 is required to work. Sample message id is chosen as a 1-based warp lane index. Any two warps in communication must have same message id in their corresponding warp lanes to receive/send data properly.\n    uint32_t sampleMessageIndex = warpLane + 1;  \n    bool broadcaster = globalWarpId == 0;\n    bool warpIsInTheHierarchy = globalWarpId < numCommunicatingWarps;\n    // Sending a message (thread index + input) from the first warp. The datas are 0, 1, 2, ..., 31.\n    uint32_t sampleData = globalThreadId + input;\n    uint32_t messageId = sampleMessageIndex;\n    // Only the first warp requires preparation of the message as it is the broadcaster.\n    if (broadcaster) {\n        // Encoding messageId and sample data. Sample data is written to the most significant 24 bits of the message, and the message ID is written to the least significant 8 bits of the message. This is for atomically sending both id and data.\n        uint32_t message = ((sampleData << ID_BITS) | messageId);\n        message_d[warpLane] = message;\n        __threadfence(); \n    }\n    if(warpIsInTheHierarchy) {\n        // Receiving the message and sending it to the next two warps, with minimal contention.\n        uint32_t receivedSampleData = d_broadcast(messageId, warpLane, message_d, numCommunicatingWarps, globalWarpId);\n        // Writing the result.\n        output_d[globalThreadId] = receivedSampleData;\n    }\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

@@ -1,24 +1,18 @@
 {
- "task_id": "cuda_164__compile_error__6de38688",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "#include \"predicate_filter.h\"\n#include <thrust/reduce.h>\n#include <thrust/partition.h>\n#include <thrust/copy.h>\n#include <thrust/execution_policy.h>\n\nvoid predicateBasedFilter(thrust::device_vector<int>& inOutVector, thrust::device_vector<int>& predicateVector, thrust::device_vector<int>& outVector) {\n\n\t// Compute output length using the predicate vector and filter the output\n\tint outLength = thrust::reduce(thrust::device, predicateVector.begin(), predicateVector.end());\n\tthrust::stable_partition(thrust::device, inOutVector.begin(), inOutVector.end(), predicateVector.begin(), ::cuda::std::identity{});\n\n\t// Copy subarray from device memory to host memory\n\toutVector.resize(outLength);\n\tthrust::copy(thrust::device, inOutVector.begin(), inOutVector.begin() + outLength, outVector.begin());\n}"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_164__compile_error__6de38688",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "#include \"predicate_filter.h\"\n#include <thrust/reduce.h>\n#include <thrust/partition.h>\n#include <thrust/copy.h>\n#include <thrust/execution_policy.h>\n\nvoid predicateBasedFilter(thrust::device_vector<int>& inOutVector, thrust::device_vector<int>& predicateVector, thrust::device_vector<int>& outVector) {\n\n\t// Compute output length using the predicate vector and filter the output\n\tint outLength = thrust::reduce(thrust::device, predicateVector.begin(), predicateVector.end());\n\tthrust::stable_partition(thrust::device, inOutVector.begin(), inOutVector.end(), predicateVector.begin(), ::cuda::std::identity{});\n\n\t// Copy subarray from device memory to host memory\n\toutVector.resize(outLength);\n\tthrust::copy(thrust::device, inOutVector.begin(), inOutVector.begin() + outLength, outVector.begin());\n}"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3
 }

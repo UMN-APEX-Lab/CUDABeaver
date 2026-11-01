@@ -1,24 +1,19 @@
 {
- "task_id": "cuda_1__memory_crash__4c324055",
- "reference_solution": {
-  "type": "file",
-  "files": [
-   {
-    "path": "solution.cu",
-    "content": "// file: solution.cu\n#include \"kernel_launch.h\"\n#include \"kernel_helpers.h\"\n\nvoid launch(int gridSizeX, int blockSizeX, int gridSizeY, int blockSizeY, int gridSizeZ,\n            int blockSizeZ)\n{\n    int *output, *input;\n    // Allocate shared memory\n    int sharedMemory = blockSizeX * blockSizeY * blockSizeZ * sizeof(int);\n\n    // Launch kernel\n    kernel<<<dim3(gridSizeX, gridSizeY, gridSizeZ), dim3(blockSizeX, blockSizeY, blockSizeZ), sharedMemory>>>(output, input);\n}\n"
-   }
-  ]
- },
- "benchmark_command": "./test.out --perf",
- "timing_mode": {
-  "type": "region",
-  "include": [
-   "bench_region"
-  ],
-  "exclude": null,
-  "time_type": "kernel"
- },
- "n_trials": 100,
- "warmup_trials": 3,
- "requires_arch": null
+  "task_id": "cuda_1__memory_crash__4c324055",
+  "reference_solution": {
+    "type": "file",
+    "files": [
+      {
+        "path": "solution.cu",
+        "content": "// file: solution.cu\n#include \"kernel_launch.h\"\n#include \"kernel_helpers.h\"\n#include <cuda_runtime.h>\n\nvoid launch(int gridSizeX, int blockSizeX, int gridSizeY, int blockSizeY, int gridSizeZ,\n            int blockSizeZ)\n{\n    dim3 grid(gridSizeX, gridSizeY, gridSizeZ);\n    dim3 block(blockSizeX, blockSizeY, blockSizeZ);\n    size_t count = size_t(grid.x) * grid.y * grid.z * block.x * block.y * block.z;\n\n    int *output = nullptr;\n    int *input = nullptr;\n    cudaMalloc(&output, count * sizeof(int));\n    cudaMalloc(&input, count * sizeof(int));\n    cudaMemset(input, 0, count * sizeof(int));\n\n    int sharedMemory = blockSizeX * blockSizeY * blockSizeZ * sizeof(int);\n    kernel<<<grid, block, sharedMemory>>>(output, input);\n    cudaDeviceSynchronize();\n\n    cudaFree(output);\n    cudaFree(input);\n}\n"
+      }
+    ]
+  },
+  "benchmark_command": "./test.out --perf",
+  "timing_mode": {
+    "type": "cuda_event_stdout"
+  },
+  "n_trials": 100,
+  "warmup_trials": 3,
+  "requires_arch": null
 }

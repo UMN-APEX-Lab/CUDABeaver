@@ -1,0 +1,20 @@
+{
+  "task_id": "kernelbench_level1_92__compile_error__52277656",
+  "reference_hash": "6bfc98010e8a0a6c33f2f18f2d879a4c09509d84b2a551ebce0bd48c5a7ade63",
+  "gpu_signature": "nvidia_rtx_pro_6000_blackwell_server_edition_sm_120_cuda_13_0",
+  "cuda_version": "13.0",
+  "timing": {
+    "method": "kernelbench_eval_result",
+    "mean_ms": 20.3,
+    "p50_ms": 20.3,
+    "p95_ms": 23.8,
+    "stddev_ms": 0.372,
+    "raw_samples_ms": [],
+    "n_trials": 100,
+    "warmup_trials": 0
+  },
+  "measured_at": "2026-06-26T01:16:57Z",
+  "elapsed_total_s": 38.59410548210144,
+  "skipped": null,
+  "timing_fingerprint": "5e7e4928bfa6442d421ef86661f7928760c7bc40a5302d9d6c77fd93190ceec7"
+}

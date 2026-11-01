@@ -20,6 +20,10 @@ def build_feedback(
     level: int = 3,
     ncu_data: dict | None = None,
     mode: str = "aware",
+    *,
+    sanitizer_summary: dict | None = None,
+    repair_mode: str | None = None,
+    minimal_patch: bool = False,
 ) -> str | None:
     """Build a feedback message at the requested signal level (Exp 3).
 
@@ -41,18 +45,115 @@ def build_feedback(
     if level == 0:
         return None
     if level == 1:
-        return _feedback_l1_g_only(previous_code)
+        return _append_agent_context(
+            _feedback_l1_g_only(previous_code),
+            sanitizer_summary=sanitizer_summary,
+            repair_mode=repair_mode,
+            minimal_patch=minimal_patch,
+        )
     if level == 2:
-        return _feedback_l2_gb(classification, build_output, previous_code)
+        return _append_agent_context(
+            _feedback_l2_gb(classification, build_output, previous_code),
+            sanitizer_summary=sanitizer_summary,
+            repair_mode=repair_mode,
+            minimal_patch=minimal_patch,
+        )
     if level == 4:
         l3_msg = _feedback_l3(classification, build_output, test_output, previous_code)
         if ncu_data:
-            return l3_msg + "\n\n## Profiler Metrics (ncu)\n" + _format_ncu(ncu_data)
-        return l3_msg
+            l3_msg = l3_msg + "\n\n## Profiler Metrics (ncu)\n" + _format_ncu(ncu_data)
+        return _append_agent_context(
+            l3_msg,
+            sanitizer_summary=sanitizer_summary,
+            repair_mode=repair_mode,
+            minimal_patch=minimal_patch,
+        )
     # Level 3
     if mode == "raw":
-        return _feedback_generic(build_output, test_output, previous_code)
-    return _feedback_l3(classification, build_output, test_output, previous_code)
+        msg = _feedback_generic(build_output, test_output, previous_code)
+    else:
+        msg = _feedback_l3(classification, build_output, test_output, previous_code)
+    return _append_agent_context(
+        msg,
+        sanitizer_summary=sanitizer_summary,
+        repair_mode=repair_mode,
+        minimal_patch=minimal_patch,
+    )
+
+
+def _append_agent_context(
+    feedback: str | None,
+    *,
+    sanitizer_summary: dict | None,
+    repair_mode: str | None,
+    minimal_patch: bool,
+) -> str | None:
+    if feedback is None:
+        return None
+    additions = []
+    if repair_mode:
+        additions.extend(["", "## Repair Mode", str(repair_mode)])
+    sanitizer_text = _format_sanitizer_summary(sanitizer_summary)
+    if sanitizer_text:
+        additions.extend(["", sanitizer_text])
+    if minimal_patch:
+        additions.extend([
+            "",
+            "## Patch Scope",
+            "Make the smallest change that addresses the current failure. Avoid unrelated rewrites.",
+        ])
+    if not additions:
+        return feedback
+    return feedback.rstrip() + "\n" + "\n".join(additions)
+
+
+def _format_sanitizer_summary(sanitizer_summary: dict | None) -> str:
+    if not sanitizer_summary or not sanitizer_summary.get("triggered"):
+        return ""
+
+    lines = ["## Sanitizer Diagnostics"]
+    real_hits = sanitizer_summary.get("real_hit_tools") or []
+    hit_tools = sanitizer_summary.get("hit_tools") or []
+    timed_out = sanitizer_summary.get("timed_out_tools") or []
+    unavailable = sanitizer_summary.get("unavailable_tools") or []
+    if real_hits:
+        lines.append(f"- real_hits: {', '.join(map(str, real_hits))}")
+    elif hit_tools:
+        lines.append(f"- hit_tools: {', '.join(map(str, hit_tools))}")
+    else:
+        lines.append("- hits: none")
+    if timed_out:
+        lines.append(f"- timed_out: {', '.join(map(str, timed_out))}")
+    if unavailable:
+        lines.append(f"- unavailable: {', '.join(map(str, unavailable))}")
+
+    for tool, info in (sanitizer_summary.get("results") or {}).items():
+        if not isinstance(info, dict):
+            continue
+        lines.append(f"- tool: {tool}")
+        if info.get("summary"):
+            lines.append(f"  summary: {_one_line(str(info.get('summary')), 500)}")
+        if info.get("error"):
+            lines.append(f"  error: {_one_line(str(info.get('error')), 300)}")
+        finding = info.get("primary_finding")
+        if finding:
+            lines.append(f"  primary_finding: {_one_line(str(finding), 500)}")
+        output = info.get("output") or ""
+        if output:
+            lines.extend([
+                "  output_excerpt:",
+                "  ```",
+                _truncate(str(output), 1200),
+                "  ```",
+            ])
+    return "\n".join(lines)
+
+
+def _one_line(text: str, max_len: int) -> str:
+    text = " ".join(text.split())
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3] + "..."
 
 
 def _feedback_l1_g_only(previous_code: str) -> str:

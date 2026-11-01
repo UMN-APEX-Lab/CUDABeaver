@@ -1,0 +1,37 @@
+api:
+  backend: openai
+  model: gpt-5.4
+  base_url: null
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.8
+  top_p: 1.0
+  max_completion_tokens: 65536
+  reasoning_effort: low
+
+experiment:
+  name: gpt5_4_repeated_compile101_low_pgate095_maxtok65536_gpu3
+  method: repeated
+  n_attempts: 5
+  max_iterations: 5
+  max_history_rounds: 4
+  seed_strategy: attempt_idx
+  performance_gate:
+    enabled: true
+    min_speedup: 0.95
+    fail_on_skipped: true
+  measure_perf_on_pass: true
+  dataset_dir: data
+  output_dir: outputs/repeated/gpt5_4_repeated_compile101_low_pgate095_maxtok65536_gpu3
+  tasks: []
+  error_category: compile_error
+  gpu_id: 3
+
+build:
+  timeout: 300
+  test_timeout: 300
+  workdir: /tmp/cuda_debugger_gpt5_4_repeated_compile101_low_pgate095_maxtok65536_gpu3
+  gpu_id: 3
+
+logging:
+  level: INFO
+  save_api_responses: true

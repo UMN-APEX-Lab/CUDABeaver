@@ -1,12 +1,11 @@
-# Smoke-test config for the new method=agent loop.
-# Targets the local vLLM endpoint on :8001 (gemma-4-31B-it, thinking on —
+# Smoke-test config for method=agent.
+# Targets a local vLLM endpoint on :8001 (gemma-4-31B-it, thinking on —
 # thinking is parsed out server-side, so `content` comes back clean).
-# GPU 1 for builds. Run with:
-#   cd ~/CUDABeaver
-#   CUDA_VISIBLE_DEVICES=1 OPENAI_API_KEY=EMPTY \
+# Run with:
+#   CUDA_VISIBLE_DEVICES=0 OPENAI_API_KEY=EMPTY \
 #     python -m harness.run_experiment -c configs/agent/agent_smoke.yaml \
-#       --tasks CUDA_10
-
+#       --mode debug --v2-task-list benchmark/task_list.json \
+#       --tasks cuda_110__logic_error__957be815
 api:
   backend: "vllm"
   model: "google/gemma-4-31B-it"
@@ -24,9 +23,9 @@ experiment:
   name: "agent_smoke"
   method: "agent"
   max_iterations: 10
-  dataset_dir: "."
+  dataset_dir: "data"
   output_dir: "results_agent_smoke"
-  tasks: null   # use --tasks CUDA_10 on the CLI
+  tasks: null   # pass --tasks <instance_id> on the CLI
 
 build:
   timeout: 300

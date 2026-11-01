@@ -12,7 +12,7 @@ This single repository ships **everything** end-to-end:
 - the 199-instance dataset under `data/` (broken_start + reference + testbench + per-instance metadata),
 - the evaluation harness (`harness/`) that drives the gen → build → test → score loop,
 - the analysis pipeline (`analysis/`) that produces every paper table,
-- 238 evaluation configs (`configs/`) covering 5 axes (iter / repeated / feedback / history / fewshot),
+- 274 evaluation configs (`configs/`) covering 5 axes (iter / repeated / feedback / history / fewshot) plus the tool-calling agent (`agent/`),
 - bundled CUTLASS + ThunderKittens headers (`data/_external/`) and a vendored copy of upstream KernelBench (`harness/_vendor/kernelbench/`) so no external clones are needed.
 
 ---
@@ -54,7 +54,9 @@ harness/                   evaluation engine
   feedback.py                Exp 3: feedback-level dispatcher (L0 … L4, error-aware modes)
   few_shot.py                Exp 7: in-context debug-pair retrieval
   benchmark.py               perf measurement orchestrator
-  timing_modes/              5 timing backends (elapsed, kernels, applied-kernels, region, kernelbench)
+  performance.py             speedup gate (candidate vs cached reference baseline)
+  timing_modes/              timing backends (cuda_event_stdout, elapsed, applied-kernels, kernelbench)
+  task_registry.py           resolves full instance ids via benchmark/task_list.json
   applied_kernels_eval.py    adapter for Class 2 def.py-based tasks
   applied_kernels_runner/    vendored class-1/2 backend (runner, eval, compiler, …)
   _vendor/kernelbench/       upstream KernelBench (MIT, ScalingIntelligence/KernelBench)
@@ -62,6 +64,13 @@ harness/                   evaluation engine
   parallel_runner.py         per-task parallelism (N workers across N GPUs)
   queue_daemon.py            crash-safe queue daemon for long-batch sweeps
   references/schema.py       task / instance schema definitions
+  agent_loop.py              method=agent entry: ReAct / blackboard tool-calling debugger
+  agent_tools.py             agent tool registry (read / analyze / sanitize / build / test / edit)
+  cudeubgger/                agent workflows (react.py, blackboard.py) + trace records
+  context_manager.py         agent token budget, nudges, history compaction
+  context_summary.py         LLM-backed summarisation of oversized tool results
+  debug_assist.py            precheck, patch-scope analysis, failed-patch verification
+  diagnostics.py             compute-sanitizer wrapper (normalized, never raises)
 
 analysis/                  result aggregation
   scanner.py                 walks outputs/ and emits Run records
@@ -72,12 +81,13 @@ analysis/                  result aggregation
   render_latex.py            booktabs LaTeX renderer
   p_sweep.py                 CLI: offline gate re-scoring at 9 thresholds
 
-configs/                   238 evaluation configs across 5 axes
+configs/                   274 evaluation configs
   iter/                      single-shot debug
   repeated/                  repeated@k vs iterative@k
   feedback/                  L0 (none) → L4 (oracle); + L3_raw + error-aware modes
   history/                   H1 … H4 multi-turn history rounds
   fewshot/                   in-context debug-pair retrieval
+  agent/                     tool-calling agent (ReAct / blackboard workflows)
 
 scripts/                   one-time setup + utilities
   prepare_benchmark.sh       materialize flat dataset layout (one-time, idempotent)
@@ -334,6 +344,36 @@ python -m analysis.pivot_tables  --in-dir analysis_out --out-dir analysis_out
 ```
 
 `analysis_out/tables/exp1_iter.tex` matches paper Table 1.
+
+### Agent mode
+
+Setting `experiment.method: agent` replaces the fixed gen → build → test loop
+with a tool-calling debugger (configs under `configs/agent/`). It always starts
+from the instance's `broken_start`, so it runs in debug mode only:
+
+```bash
+python -m harness.run_experiment -c configs/agent/agent_smoke.yaml \
+    --mode debug --v2-task-list benchmark/task_list.json \
+    --tasks cuda_110__logic_error__957be815
+```
+
+- **Workflow** (`agent.workflow`): `react` — a single agent that must call
+  `locate_bug` before `apply_edit` / `write_solution` are unlocked; or
+  `blackboard` — analyzer → executor → verifier → coder roles, each limited to
+  the tool subset in `agent.blackboard.*_tools`.
+- **Tools**: `read_code`, `read_test_file`, `read_prompt`,
+  `run_static_analysis`, `run_compute_sanitizer`, `build_only`, `test_only`,
+  `locate_bug`, `apply_edit`, `write_solution` (build + test = one patch
+  submission). `agent.tools` takes an allow-list for ablations.
+- **Budgets**: `max_patch_submissions`, `max_tool_calls_per_task`, per-tool
+  `quotas`, and a context `token_budget`; oversized tool results are
+  summarised (`use_llm_summary`) or truncated past `tool_result_cap_chars`.
+- **Performance gate**: `agent.performance_gate.min_speedup` requires a passing
+  patch to also reach that speedup over the cached reference baseline.
+
+The model endpoint must support OpenAI-style tool calling (or set
+`action_protocol: json`). Each run writes a per-task `tool_trace/<task>.jsonl`
+next to the usual `manifest.jsonl`.
 
 ### LLM endpoints — required swap
 
